@@ -1618,3 +1618,136 @@ html[data-theme="light"] .source-text-box {
 .theme-toggle:hover {
     transform: translateY(-1px);
 }
+
+/* ================================
+   Mobile chat polish fixes
+   ================================ */
+
+@media (max-width: 800px) {
+    .chat-header-row {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+    }
+
+    .compact-intro {
+        flex: 1;
+        min-width: 0;
+        padding: 8px 10px;
+    }
+
+    .compact-intro strong {
+        font-size: 13px;
+    }
+
+    .chat-header-row form {
+        width: auto;
+        flex-shrink: 0;
+    }
+
+    .clear-chat-btn {
+        width: auto;
+        padding: 7px 10px;
+        font-size: 11px;
+        border-radius: 999px;
+        white-space: nowrap;
+    }
+
+    .conversation-window {
+        padding: 10px 8px;
+    }
+
+    .chat-message-row {
+        margin-bottom: 10px;
+    }
+
+    .message-bubble {
+        max-width: 88%;
+        padding: 10px 11px;
+        border-radius: 15px;
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+    .user-bubble {
+        max-width: 82%;
+        border-bottom-right-radius: 5px;
+    }
+
+    .assistant-bubble {
+        max-width: 92%;
+        border-bottom-left-radius: 5px;
+    }
+
+    .assistant-bubble strong {
+        font-size: 12px;
+    }
+
+    .assistant-answer {
+        margin-top: 6px;
+    }
+
+    .message-sources {
+        margin-top: 10px;
+        padding: 8px;
+        border-radius: 12px;
+    }
+
+    .message-sources summary {
+        font-size: 12px;
+    }
+
+    .message-sources .source-list {
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .source-item,
+    .compact-source-item {
+        padding: 7px 8px;
+        border-radius: 10px;
+    }
+
+    .source-item strong,
+    .compact-source-item strong {
+        font-size: 12px;
+    }
+
+    .source-item p,
+    .compact-source-item p {
+        font-size: 11px;
+        line-height: 1.35;
+        margin-top: 3px;
+    }
+
+    .clickable-source:hover {
+        transform: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .message-bubble {
+        max-width: 90%;
+        font-size: 12.5px;
+        padding: 9px 10px;
+    }
+
+    .user-bubble {
+        max-width: 84%;
+    }
+
+    .assistant-bubble {
+        max-width: 94%;
+    }
+
+    .clear-chat-btn {
+        padding: 6px 8px;
+        font-size: 10.5px;
+    }
+
+    .source-item,
+    .compact-source-item {
+        padding: 6px 7px;
+    }
+}

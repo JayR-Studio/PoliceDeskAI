@@ -102,17 +102,46 @@ def admin_required(route_function):
 with app.app_context():
     db.create_all()
 
-    try:
-        with db.engine.connect() as connection:
-            columns = connection.exec_driver_sql("PRAGMA table_info(document_chunks)").fetchall()
-            column_names = [column[1] for column in columns]
+    if db.engine.url.drivername.startswith("sqlite"):
+        try:
+            with db.engine.connect() as connection:
+                columns = connection.exec_driver_sql(
+                    "PRAGMA table_info(document_chunks)"
+                ).fetchall()
 
-            if "embedding_json" not in column_names:
-                connection.exec_driver_sql("ALTER TABLE document_chunks ADD COLUMN embedding_json TEXT")
-                connection.commit()
+                column_names = [column[1] for column in columns]
+
+                if "embedding_json" not in column_names:
+                    connection.exec_driver_sql(
+                        "ALTER TABLE document_chunks ADD COLUMN embedding_json TEXT"
+                    )
+                    connection.commit()
+
+        except Exception as e:
+            print(f"Local migration warning: {e}")
+
+
+@app.route("/db-test")
+@admin_required
+def db_test():
+    try:
+        document_count = Document.query.count()
+        chunk_count = DocumentChunk.query.count()
+        message_count = ChatMessage.query.count()
+
+        return {
+            "status": "connected",
+            "database": str(db.engine.url).split("@")[-1],
+            "documents": document_count,
+            "chunks": chunk_count,
+            "messages": message_count
+        }, 200
 
     except Exception as e:
-        print(f"Local migration warning: {e}")
+        return {
+            "status": "error",
+            "message": str(e)
+        }, 500
 
 
 def allowed_file(filename):

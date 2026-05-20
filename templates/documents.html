@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block page_title %}Saved Documents{% endblock %}
+
+{% block content %}
+<section class="preview-card">
+    <div class="preview-header">
+        <div>
+            <h3>Document Library</h3>
+            <p>Manage uploaded documents, chunks, and embeddings.</p>
+        </div>
+
+        <a href="{{ url_for('embeddings_page') }}" class="primary-btn">
+            Generate Missing Embeddings
+        </a>
+    </div>
+
+    <div class="danger-actions">
+        <form method="POST" action="{{ url_for('clear_embeddings') }}">
+            <button type="submit" class="danger-outline-btn">
+                Clear Embeddings Only
+            </button>
+        </form>
+
+        <form method="POST" action="{{ url_for('clear_documents') }}">
+            <button type="submit" class="danger-btn">
+                Clear Documents & Chunks
+            </button>
+        </form>
+
+        <form method="POST" action="{{ url_for('full_reset') }}">
+            <button type="submit" class="danger-btn">
+                Full Reset
+            </button>
+        </form>
+    </div>
+
+    {% if document_stats %}
+        <div class="document-list improved-document-list">
+            {% for item in document_stats %}
+                {% set document = item.document %}
+
+                <article class="document-card improved-document-card">
+                    <div class="document-main-info">
+                        <h4>{{ document.title }}</h4>
+                        <p>{{ document.filename }}</p>
+
+                        <div class="document-meta">
+                            <span>{{ document.category or "Uncategorized" }}</span>
+                            <span>{{ item.total_chunks }} chunks</span>
+                            <span>{{ item.embedded_chunks }} / {{ item.total_chunks }} embedded</span>
+                        </div>
+
+                        <div class="mini-progress-bar">
+                            <div class="mini-progress-fill" style="width: {{ item.progress }}%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="document-side-actions">
+                        <span class="status-pill status-{{ item.status|lower|replace(' ', '-') }}">
+                            {{ item.status }}
+                        </span>
+
+                        <a href="{{ url_for('document_detail', document_id=document.id) }}" class="small-action-btn">
+                            View
+                        </a>
+
+                        <form
+                            method="POST"
+                            action="{{ url_for('delete_document', document_id=document.id) }}"
+                            onsubmit="return confirm('Are you sure you want to delete this document and all its chunks?');"
+                        >
+                            <button type="submit" class="small-danger-btn">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-documents-text">No documents uploaded yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

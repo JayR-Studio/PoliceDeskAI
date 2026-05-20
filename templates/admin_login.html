@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block page_title %}Admin Login{% endblock %}
+
+{% block content %}
+<section class="login-card">
+    <div class="login-header">
+        <h3>Admin Access</h3>
+        <p>Login to manage documents, embeddings, and system settings.</p>
+    </div>
+
+    <form method="POST" class="login-form">
+        <label for="username">Username</label>
+        <input
+            type="text"
+            name="username"
+            id="username"
+            placeholder="Enter admin username"
+            required
+        >
+
+        <label for="password">Password</label>
+        <input
+            type="password"
+            name="password"
+            id="password"
+            placeholder="Enter admin password"
+            required
+        >
+
+        <button type="submit" class="primary-btn">Login</button>
+    </form>
+</section>
+{% endblock %}

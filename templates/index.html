@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="hero-card">
+    <div>
+        <h3>Good morning, Officer</h3>
+        <p>Your AI assistant for police documents, procedures, scenarios, and reports.</p>
+    </div>
+
+    <a href="{{ url_for('chat') }}" class="primary-btn">Ask Manual</a>
+</section>
+
+<section class="quick-grid">
+    <div class="quick-card">
+        <div class="icon">🚔</div>
+        <h4>Accident Scene</h4>
+        <p>Get quick procedural guidance.</p>
+    </div>
+
+    <div class="quick-card">
+        <div class="icon">📝</div>
+        <h4>Statement Taking</h4>
+        <p>Reference proper documentation steps.</p>
+    </div>
+
+    <div class="quick-card">
+        <div class="icon">⚖️</div>
+        <h4>Human Rights</h4>
+        <p>Stay guided by lawful procedure.</p>
+    </div>
+
+    <div class="quick-card">
+        <div class="icon">📄</div>
+        <h4>Case Diary</h4>
+        <p>Prepare better investigation records.</p>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block page_title %}Generate Embeddings{% endblock %}
+
+{% block content %}
+<section class="preview-card">
+    <div class="preview-header">
+        <div>
+            <h3>Embedding Progress</h3>
+            <p>The system is converting document chunks into searchable AI vectors.</p>
+        </div>
+    </div>
+
+    <div class="progress-wrapper">
+        <div class="progress-info">
+            <span id="progressText">Preparing...</span>
+            <strong id="progressPercent">0%</strong>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="progress-stats">
+            <div>
+                <span>Total chunks</span>
+                <strong id="totalChunks">0</strong>
+            </div>
+
+            <div>
+                <span>Completed</span>
+                <strong id="completedChunks">0</strong>
+            </div>
+
+            <div>
+                <span>Pending</span>
+                <strong id="pendingChunks">0</strong>
+            </div>
+        </div>
+
+        <p class="preview-note" id="statusMessage">
+            Do not close this page while embeddings are being generated.
+        </p>
+
+        <div class="progress-actions">
+            <a href="{{ url_for('documents') }}" class="secondary-btn">Back to Documents</a>
+            <button id="startButton" class="primary-btn">Start Generation</button>
+        </div>
+    </div>
+</section>
+
+<script>
+    const progressText = document.getElementById("progressText");
+    const progressPercent = document.getElementById("progressPercent");
+    const progressFill = document.getElementById("progressFill");
+    const totalChunks = document.getElementById("totalChunks");
+    const completedChunks = document.getElementById("completedChunks");
+    const pendingChunks = document.getElementById("pendingChunks");
+    const statusMessage = document.getElementById("statusMessage");
+    const startButton = document.getElementById("startButton");
+
+    let isRunning = false;
+
+    async function fetchStatus() {
+        const response = await fetch("{{ url_for('embeddings_status') }}");
+        const data = await response.json();
+
+        totalChunks.textContent = data.total_chunks;
+        completedChunks.textContent = data.completed_chunks;
+        pendingChunks.textContent = data.pending_chunks;
+
+        progressPercent.textContent = `${data.progress}%`;
+        progressFill.style.width = `${data.progress}%`;
+
+        if (data.pending_chunks === 0 && data.total_chunks > 0) {
+            progressText.textContent = "Completed";
+            statusMessage.textContent = "All embeddings have been generated successfully.";
+            startButton.disabled = true;
+            startButton.textContent = "Completed";
+        } else {
+            progressText.textContent = "Ready";
+        }
+
+        return data;
+    }
+
+    async function processBatch() {
+        if (!isRunning) return;
+
+        startButton.disabled = true;
+        startButton.textContent = "Generating...";
+
+        try {
+            const response = await fetch("{{ url_for('process_embedding_batch') }}", {
+                method: "POST"
+            });
+
+            const data = await response.json();
+
+            statusMessage.textContent = data.message;
+
+            const status = await fetchStatus();
+
+            if (data.done || status.pending_chunks === 0) {
+                isRunning = false;
+                progressText.textContent = "Completed";
+                startButton.textContent = "Completed";
+                startButton.disabled = true;
+                statusMessage.textContent = "All embeddings have been generated successfully.";
+                return;
+            }
+
+            setTimeout(processBatch, 500);
+
+        } catch (error) {
+            isRunning = false;
+            startButton.disabled = false;
+            startButton.textContent = "Resume Generation";
+            statusMessage.textContent = "Something went wrong. You can resume generation.";
+            console.error(error);
+        }
+    }
+
+    startButton.addEventListener("click", async () => {
+        isRunning = true;
+        progressText.textContent = "Generating...";
+        await processBatch();
+    });
+
+    fetchStatus();
+</script>
+{% endblock %}

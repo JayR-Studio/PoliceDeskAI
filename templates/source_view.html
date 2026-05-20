@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block page_title %}Source Reference{% endblock %}
+
+{% block content %}
+<section class="source-view-card">
+    <div class="source-view-header">
+        <div>
+            <h3>{{ chunk.document.title }}</h3>
+            <p>
+                {{ chunk.document.category or "Uncategorized" }}
+                • Chunk {{ chunk.chunk_number }}
+
+                {% if chunk.page_start %}
+                • Page {{ chunk.page_start }}{% if chunk.page_end and chunk.page_end != chunk.page_start %}–{{
+                chunk.page_end }}{% endif %}
+                {% endif %}
+
+                • {{ chunk.word_count }} words
+            </p>
+        </div>
+
+        <a href="{{ url_for('chat') }}" class="secondary-btn">Back to Chat</a>
+    </div>
+
+    <div class="source-text-box">
+        {{ chunk.chunk_text | replace('\n', '<br>') | safe }}
+    </div>
+</section>
+{% endblock %}

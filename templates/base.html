@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoliceDesk AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/policedesk_ai_futuristic_style.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">⚜</div>
+            <div>
+                <h1>PoliceDesk <span>AI</span></h1>
+                <p>Official document assistant</p>
+            </div>
+        </div>
+
+        <nav>
+            <a href="{{ url_for('index') }}">Dashboard</a>
+            <a href="{{ url_for('chat') }}">Ask Manual</a>
+
+            {% if session.get("is_admin") %}
+            <a href="{{ url_for('admin_upload') }}">Upload Documents</a>
+            <a href="{{ url_for('documents') }}">Documents</a>
+            {% endif %}
+        </nav>
+        {% if session.get("is_admin") %}
+        <form method="POST" action="{{ url_for('admin_logout') }}" class="logout-form">
+            <button type="submit">Logout Admin</button>
+        </form>
+        {% endif %}
+
+        <div class="sidebar-note">
+            <strong>Secure reference tool</strong>
+            <p>Answers should be verified against official procedure.</p>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">Trusted. Secure. Built for policing.</p>
+                <h2>{% block page_title %}{% endblock %}</h2>
+            </div>
+            <div class="theme-bar">
+                <button type="button" class="theme-toggle" data-theme-toggle>
+                    <span class="theme-toggle-icon" data-theme-icon>☀️</span>
+                    <span data-theme-label>Light</span>
+                </button>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-wrapper">
+            {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+</div>
+
+<script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
+</body>
+</html>

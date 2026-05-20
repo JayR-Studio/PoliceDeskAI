@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block body_class %}chat-page{% endblock %}
+
+{% block page_title %}Ask Manual{% endblock %}
+
+{% block content %}
+<section class="chat-card real-chat-card">
+    <div class="chat-header-row">
+        <div class="assistant-message compact-intro">
+            <strong>PoliceDesk AI</strong>
+            <p>
+                Ask questions from uploaded police documents. The assistant answers using retrieved official document
+                context.
+            </p>
+        </div>
+
+        <form method="POST" action="{{ url_for('clear_chat') }}">
+            <button type="submit" class="secondary-btn clear-chat-btn">Clear Chat</button>
+        </form>
+    </div>
+
+    <div class="prompt-presets">
+        <button type="button" class="preset-btn" data-style="steps"
+                data-prompt="Explain the proper procedure for handling an accident scene in a clear practical format.">
+            Accident Scene
+        </button>
+
+        <button type="button" class="preset-btn" data-style="steps"
+                data-prompt="Explain the proper procedure for taking a statement from a complainant or witness.">
+            Statement Taking
+        </button>
+
+        <button type="button" class="preset-btn" data-style="steps"
+                data-prompt="Explain how an officer should handle a complaint at the police station.">
+            Complaint Handling
+        </button>
+
+        <button type="button" class="preset-btn" data-style="steps"
+                data-prompt="Explain the proper procedure after arresting a suspect.">
+            Arrest Procedure
+        </button>
+
+        <button type="button" class="preset-btn" data-style="summary"
+                data-prompt="Explain the purpose and proper use of the station diary.">
+            Station Diary
+        </button>
+
+        <button type="button" class="preset-btn" data-style="steps"
+                data-prompt="Explain how a case diary should be properly maintained.">
+            Case Diary
+        </button>
+
+        <button type="button" class="preset-btn" data-style="auto"
+                data-prompt="Draft a professional police signal based on the details I will provide.">
+            Signal Drafting
+        </button>
+    </div>
+
+    <div class="conversation-window" id="conversationWindow" data-has-messages="{{ 'true' if messages else 'false' }}">
+        {% if messages %}
+        {% for message in messages %}
+        {% if message.role == "user" %}
+        <div class="chat-message-row user-row">
+            <div class="message-bubble user-bubble">
+                <p>{{ message.content }}</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="chat-message-row assistant-row">
+            <div class="message-bubble assistant-bubble">
+                <strong>PoliceDesk AI</strong>
+                <div class="assistant-answer">
+                    {{ message.content | replace('\n', '<br>') | safe }}
+                </div>
+
+                {% if message.sources_json %}
+                {% set sources = message.sources_json | fromjson %}
+                {% if sources %}
+                <details class="message-sources">
+                    <summary>Reference Sources</summary>
+
+                    <div class="source-list">
+                        {% for source in sources %}
+                        {% if source.chunk_id %}
+                        <a
+                                href="{{ url_for('view_source', chunk_id=source.chunk_id) }}"
+                                class="source-item compact-source-item clickable-source"
+                        >
+                            <strong>{{ source.document_title }}</strong>
+                            <p>
+                                {{ source.category }}
+
+                                {% if source.page_start %}
+                                • Page {{ source.page_start }}{% if source.page_end and source.page_end !=
+                                source.page_start %}–{{ source.page_end }}{% endif %}
+                                {% else %}
+                                • Reference {{ source.source_number }}
+                                {% endif %}
+
+                                • View source
+                            </p>
+                        </a>
+                        {% else %}
+                        <div class="source-item compact-source-item">
+                            <strong>{{ source.document_title }}</strong>
+                            <p>
+                                {{ source.category }}
+                                • Reference {{ source.source_number }}
+                            </p>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </details>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        <div class="empty-chat-state">
+            <h3>What do you need help with?</h3>
+            <p>Ask about accident scene procedure, complaints, station diary, arrest, investigation, or any uploaded
+                document.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <form method="POST" class="chat-form active-chat-form smart-chat-form" id="chatForm">
+        <input
+                type="text"
+                name="query"
+                id="queryInput"
+                placeholder="Ask from the uploaded police documents..."
+                required
+        >
+
+        <select name="answer_style" class="answer-style-select">
+            <option value="auto" selected>Auto Style</option>
+            <option value="essay">Essay</option>
+            <option value="steps">Step-by-step</option>
+            <option value="bullets">Bullet Points</option>
+            <option value="summary">Short Summary</option>
+        </select>
+
+        <button type="submit" id="sendButton">Ask</button>
+    </form>
+</section>
+
+<script>
+    const conversationWindow = document.getElementById("conversationWindow");
+    const chatForm = document.getElementById("chatForm");
+    const queryInput = document.getElementById("queryInput");
+    const sendButton = document.getElementById("sendButton");
+    const presetButtons = document.querySelectorAll(".preset-btn");
+    const answerStyleSelect = document.getElementById("answerStyleSelect");
+
+    function scrollConversationToBottom() {
+        if (conversationWindow) {
+            conversationWindow.scrollTop = conversationWindow.scrollHeight;
+        }
+    }
+
+    function focusInput() {
+        if (queryInput && window.innerWidth > 768) {
+            queryInput.focus();
+        }
+    }
+
+    // When page loads after a response, keep user around the chat area
+    window.addEventListener("load", function () {
+        scrollConversationToBottom();
+        focusInput();
+
+        const hasMessages = conversationWindow.dataset.hasMessages === "true";
+
+        if (hasMessages) {
+            const chatCard = document.querySelector(".real-chat-card");
+
+            if (chatCard) {
+                chatCard.scrollIntoView({
+                    behavior: "instant",
+                    block: "start"
+                });
+            }
+        }
+    });
+
+    presetButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+            const prompt = this.dataset.prompt;
+            const style = this.dataset.style || "auto";
+
+            queryInput.value = prompt;
+
+            if (answerStyleSelect) {
+                answerStyleSelect.value = style;
+            }
+
+            queryInput.focus();
+
+            if (window.innerWidth <= 768) {
+                queryInput.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+            }
+        });
+    });
+
+    chatForm.addEventListener("submit", function () {
+        const question = queryInput.value.trim();
+
+        if (!question) {
+            return;
+        }
+
+        sendButton.disabled = true;
+        sendButton.textContent = "Thinking...";
+
+        const thinkingRow = document.createElement("div");
+        thinkingRow.className = "chat-message-row assistant-row";
+        thinkingRow.innerHTML = `
+            <div class="message-bubble assistant-bubble thinking-bubble">
+                <strong>PoliceDesk AI</strong>
+                <p>Thinking...</p>
+            </div>
+        `;
+
+        conversationWindow.appendChild(thinkingRow);
+        scrollConversationToBottom();
+    });
+</script>
+{% endblock %}

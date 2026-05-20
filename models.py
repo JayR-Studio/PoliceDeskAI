@@ -37,6 +37,7 @@ class DocumentChunk(db.Model):
     page_end = db.Column(db.Integer, nullable=True)
 
     embedding_json = db.Column(db.Text, nullable=True)
+    embedding_vector = db.Column(db.Text, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.now)
 

@@ -1751,3 +1751,27 @@ html[data-theme="light"] .source-text-box {
         padding: 6px 7px;
     }
 }
+
+.document-header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.document-header-actions .inline-form {
+    margin: 0;
+}
+
+@media (max-width: 800px) {
+    .document-header-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .document-header-actions .primary-btn,
+    .document-header-actions .secondary-btn,
+    .document-header-actions .inline-form {
+        width: 100%;
+    }
+}

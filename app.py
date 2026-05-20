@@ -129,12 +129,19 @@ def db_test():
         chunk_count = DocumentChunk.query.count()
         message_count = ChatMessage.query.count()
 
+        vector_count = (
+            DocumentChunk.query
+            .filter(DocumentChunk.embedding_vector.isnot(None))
+            .count()
+        )
+
         return {
             "status": "connected",
             "database": str(db.engine.url).split("@")[-1],
             "documents": document_count,
             "chunks": chunk_count,
-            "messages": message_count
+            "messages": message_count,
+            "vector_embeddings": vector_count
         }, 200
 
     except Exception as e:
@@ -519,7 +526,10 @@ def process_embedding_batch():
     for chunk in pending_chunks:
         try:
             embedding = create_embedding(chunk.chunk_text)
+
             chunk.embedding_json = json.dumps(embedding)
+            chunk.embedding_vector = "[" + ",".join(str(value) for value in embedding) + "]"
+
             generated_count += 1
 
         except Exception as e:
@@ -536,6 +546,39 @@ def process_embedding_batch():
     })
 
 
+@app.route("/admin/backfill-vector-embeddings", methods=["POST"])
+@admin_required
+def backfill_vector_embeddings():
+    chunks = (
+        DocumentChunk.query
+        .filter(DocumentChunk.embedding_json.isnot(None))
+        .filter(DocumentChunk.embedding_vector.is_(None))
+        .all()
+    )
+
+    updated_count = 0
+    failed_count = 0
+
+    for chunk in chunks:
+        try:
+            embedding = json.loads(chunk.embedding_json)
+            chunk.embedding_vector = "[" + ",".join(str(value) for value in embedding) + "]"
+            updated_count += 1
+
+        except Exception as e:
+            print(f"Vector backfill failed for chunk {chunk.id}: {e}")
+            failed_count += 1
+
+    db.session.commit()
+
+    if failed_count:
+        flash(f"Backfilled {updated_count} vector embeddings. {failed_count} failed.", "error")
+    else:
+        flash(f"Backfilled {updated_count} vector embeddings successfully.", "success")
+
+    return redirect(url_for("documents"))
+
+
 # clear embeddings only
 @app.route("/admin/clear-embeddings", methods=["POST"])
 @admin_required
@@ -550,6 +593,7 @@ def clear_embeddings():
 
     for chunk in chunks:
         chunk.embedding_json = None
+        chunk.embedding_vector = None
 
     db.session.commit()
 

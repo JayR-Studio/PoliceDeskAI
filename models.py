@@ -13,7 +13,12 @@ class Document(db.Model):
     file_type = db.Column(db.String(20), nullable=False)
     category = db.Column(db.String(100), nullable=True)
     total_chunks = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=datetime.now)
+
+    storage_bucket = db.Column(db.String(255), nullable=True)
+    storage_path = db.Column(db.String(500), nullable=True)
+    storage_url = db.Column(db.Text, nullable=True)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     chunks = db.relationship(
         "DocumentChunk",
@@ -37,7 +42,6 @@ class DocumentChunk(db.Model):
     page_end = db.Column(db.Integer, nullable=True)
 
     embedding_json = db.Column(db.Text, nullable=True)
-    embedding_vector = db.Column(db.Text, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.now)
 

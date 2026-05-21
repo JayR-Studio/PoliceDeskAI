@@ -1,5 +1,6 @@
 import os
 import json
+import uuid
 from functools import wraps
 from dotenv import load_dotenv
 
@@ -7,14 +8,16 @@ load_dotenv()
 from services.embeddings import create_embedding
 from services.retriever import semantic_search
 from services.ai_answer import generate_rag_answer
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
-from werkzeug.utils import secure_filename
-
-from config import Config
-from models import db, Document, DocumentChunk, ChatSession, ChatMessage
+from services.storage_service import upload_document_to_storage, delete_document_from_storage
 from services.document_loader import extract_text
 from services.chunker import split_text_into_chunks
+
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
+from werkzeug.utils import secure_filename
+from config import Config
+from models import db, Document, DocumentChunk, ChatSession, ChatMessage
 from datetime import datetime, timedelta
+from sqlalchemy import text
 
 ALLOWED_EXTENSIONS = {"pdf", "docx", "txt"}
 
@@ -129,11 +132,13 @@ def db_test():
         chunk_count = DocumentChunk.query.count()
         message_count = ChatMessage.query.count()
 
-        vector_count = (
-            DocumentChunk.query
-            .filter(DocumentChunk.embedding_vector.isnot(None))
-            .count()
-        )
+        vector_count = db.session.execute(
+            text("""
+                select count(*) 
+                from document_chunks 
+                where embedding_vector is not null
+            """)
+        ).scalar()
 
         return {
             "status": "connected",
@@ -216,7 +221,10 @@ def admin_upload():
 
         filename = secure_filename(file.filename)
         file_type = filename.rsplit(".", 1)[1].lower()
-        save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+        unique_local_filename = f"{uuid.uuid4().hex[:12]}_{filename}"
+        save_path = os.path.join(app.config["UPLOAD_FOLDER"], unique_local_filename)
+
         file.save(save_path)
 
         try:
@@ -234,6 +242,7 @@ def admin_upload():
                 )
 
             chunks = split_text_into_chunks(extracted_text)
+            storage_data = upload_document_to_storage(save_path, filename)
 
             if not title:
                 title = filename.rsplit(".", 1)[0]
@@ -243,7 +252,10 @@ def admin_upload():
                 filename=filename,
                 file_type=file_type,
                 category=category if category else None,
-                total_chunks=len(chunks)
+                total_chunks=len(chunks),
+                storage_bucket=storage_data["bucket"],
+                storage_path=storage_data["path"],
+                storage_url=storage_data["url"]
             )
 
             db.session.add(saved_document)
@@ -261,6 +273,8 @@ def admin_upload():
                 db.session.add(saved_chunk)
 
             db.session.commit()
+            if os.path.exists(save_path):
+                os.remove(save_path)
 
             flash(
                 f"{filename} uploaded and saved successfully with {len(chunks)} chunks.",
@@ -268,6 +282,8 @@ def admin_upload():
             )
 
         except Exception as e:
+            if "save_path" in locals() and os.path.exists(save_path):
+                os.remove(save_path)
             db.session.rollback()
             flash(f"Document uploaded, but processing failed: {str(e)}", "error")
 
@@ -353,20 +369,35 @@ def document_detail(document_id):
 def delete_document(document_id):
     document = Document.query.get_or_404(document_id)
 
-    filename = document.filename
-    file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    document_title = document.title
+    storage_path = document.storage_path
+    storage_bucket = document.storage_bucket
+
+    print("Deleting document:", document_title)
+    print("Storage bucket:", storage_bucket)
+    print("Storage path:", storage_path)
 
     try:
+        # First delete from Supabase Storage
+        if storage_path:
+            delete_success = delete_document_from_storage(
+                storage_path,
+                storage_bucket
+            )
+
+            print("Storage delete success:", delete_success)
+        else:
+            print("No storage path found for this document.")
+
+        # Then delete database record
         db.session.delete(document)
         db.session.commit()
 
-        if os.path.exists(file_path) and os.path.isfile(file_path):
-            os.remove(file_path)
-
-        flash(f"{document.title} deleted successfully.", "success")
+        flash(f"{document_title} deleted successfully.", "success")
 
     except Exception as e:
         db.session.rollback()
+        print(f"Delete failed: {e}")
         flash(f"Failed to delete document: {str(e)}", "error")
 
     return redirect(url_for("documents"))
@@ -526,9 +557,23 @@ def process_embedding_batch():
     for chunk in pending_chunks:
         try:
             embedding = create_embedding(chunk.chunk_text)
+            embedding_vector = "[" + ",".join(str(value) for value in embedding) + "]"
 
             chunk.embedding_json = json.dumps(embedding)
-            chunk.embedding_vector = "[" + ",".join(str(value) for value in embedding) + "]"
+
+            db.session.flush()
+
+            db.session.execute(
+                text("""
+                    update document_chunks
+                    set embedding_vector = cast(:embedding_vector as extensions.vector)
+                    where id = :chunk_id
+                """),
+                {
+                    "embedding_vector": embedding_vector,
+                    "chunk_id": chunk.id
+                }
+            )
 
             generated_count += 1
 
@@ -552,7 +597,6 @@ def backfill_vector_embeddings():
     chunks = (
         DocumentChunk.query
         .filter(DocumentChunk.embedding_json.isnot(None))
-        .filter(DocumentChunk.embedding_vector.is_(None))
         .all()
     )
 
@@ -562,7 +606,21 @@ def backfill_vector_embeddings():
     for chunk in chunks:
         try:
             embedding = json.loads(chunk.embedding_json)
-            chunk.embedding_vector = "[" + ",".join(str(value) for value in embedding) + "]"
+            embedding_vector = "[" + ",".join(str(value) for value in embedding) + "]"
+
+            db.session.execute(
+                text("""
+                    update document_chunks
+                    set embedding_vector = cast(:embedding_vector as extensions.vector)
+                    where id = :chunk_id
+                    and embedding_vector is null
+                """),
+                {
+                    "embedding_vector": embedding_vector,
+                    "chunk_id": chunk.id
+                }
+            )
+
             updated_count += 1
 
         except Exception as e:
@@ -583,17 +641,17 @@ def backfill_vector_embeddings():
 @app.route("/admin/clear-embeddings", methods=["POST"])
 @admin_required
 def clear_embeddings():
-    """
-    This is useful when:
-     - You changed embedding model
-     - Embeddings generated wrongly
-     - You want to regenerate all embeddings
-    """
     chunks = DocumentChunk.query.all()
 
     for chunk in chunks:
         chunk.embedding_json = None
-        chunk.embedding_vector = None
+
+    db.session.execute(
+        text("""
+            update document_chunks
+            set embedding_vector = null
+        """)
+    )
 
     db.session.commit()
 
@@ -624,21 +682,32 @@ def clear_documents():
 @app.route("/admin/full-reset", methods=["POST"])
 @admin_required
 def full_reset():
-    "Use this only when you want a full reset."
+    documents = Document.query.all()
+
+    for document in documents:
+        if document.storage_path:
+            try:
+                delete_document_from_storage(
+                    document.storage_path,
+                    document.storage_bucket
+                )
+            except Exception as storage_error:
+                print(f"Storage delete warning for {document.id}: {storage_error}")
+
     DocumentChunk.query.delete()
     Document.query.delete()
+
+    db.session.commit()
 
     upload_folder = app.config["UPLOAD_FOLDER"]
 
     for filename in os.listdir(upload_folder):
         file_path = os.path.join(upload_folder, filename)
 
-        if os.path.isfile(file_path):
+        if os.path.isfile(file_path) and filename != ".gitkeep":
             os.remove(file_path)
 
-    db.session.commit()
-
-    flash("Full reset completed. Documents, chunks, embeddings, and uploaded files have been cleared.", "success")
+    flash("Full reset completed. Database records, chunks, embeddings, and stored files have been cleared.", "success")
     return redirect(url_for("documents"))
 
 

@@ -32,7 +32,16 @@
             <strong>{{ document.file_type|upper }}</strong>
         </div>
     </div>
+    <div class="storage-info-card">
+        <h4>Storage Information</h4>
 
+        {% if document.storage_path %}
+        <p><strong>Bucket:</strong> {{ document.storage_bucket }}</p>
+        <p><strong>Path:</strong> {{ document.storage_path }}</p>
+        {% else %}
+        <p>This document does not have a Supabase Storage path. It may have been uploaded before Day 18.</p>
+        {% endif %}
+    </div>
     <div class="danger-actions document-detail-actions">
         <form
                 method="POST"

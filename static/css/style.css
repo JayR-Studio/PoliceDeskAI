@@ -1794,3 +1794,9 @@ html[data-theme="light"] .source-text-box {
     color: var(--muted);
     word-break: break-all;
 }
+
+.upload-limit-note {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 13px;
+}

@@ -45,6 +45,23 @@ db.init_app(app)
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 
+def get_max_direct_upload_bytes():
+    max_mb = int(os.getenv("MAX_DIRECT_UPLOAD_MB", "4"))
+    return max_mb * 1024 * 1024
+
+
+def uploaded_file_is_too_large(file):
+    """
+    Checks uploaded file size without permanently consuming the file stream.
+    """
+
+    file.seek(0, os.SEEK_END)
+    file_size = file.tell()
+    file.seek(0)
+
+    return file_size > get_max_direct_upload_bytes(), file_size
+
+
 def get_or_create_chat_session():
     chat_session_id = session.get("chat_session_id")
 
@@ -217,6 +234,17 @@ def admin_upload():
 
         if not allowed_file(file.filename):
             flash("Only PDF, DOCX, and TXT files are allowed.", "error")
+            return redirect(url_for("admin_upload"))
+
+        is_too_large, file_size = uploaded_file_is_too_large(file)
+        max_mb = int(os.getenv("MAX_DIRECT_UPLOAD_MB", "4"))
+
+        if is_too_large:
+            flash(
+                f"This file is too large for direct upload on Vercel. Maximum allowed for now is {max_mb}MB. "
+                "We will add large-file upload mode next.",
+                "error"
+            )
             return redirect(url_for("admin_upload"))
 
         filename = secure_filename(file.filename)
@@ -434,10 +462,21 @@ def chat():
                 assistant_text = "I could not find relevant information in the uploaded police documents. You may need to upload or generate embeddings for the right document."
                 sources = []
             else:
+                recent_history = (
+                    ChatMessage.query
+                    .filter_by(session_id=chat_session.id)
+                    .order_by(ChatMessage.created_at.desc())
+                    .limit(6)
+                    .all()
+                )
+
+                recent_history = list(reversed(recent_history))
+
                 rag_answer = generate_rag_answer(
                     question=query,
                     search_results=latest_results,
-                    answer_style=answer_style
+                    answer_style=answer_style,
+                    chat_history=recent_history
                 )
 
                 assistant_text = rag_answer["answer"]

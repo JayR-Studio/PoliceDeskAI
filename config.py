@@ -49,7 +49,7 @@ class Config:
     DEBUG = str_to_bool(os.getenv("FLASK_DEBUG", "False"))
 
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
-    MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH", 20 * 1024 * 1024))
+    MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH", 4 * 1024 * 1024))
 
     SQLALCHEMY_DATABASE_URI = normalize_database_url(
         os.getenv("DATABASE_URL")

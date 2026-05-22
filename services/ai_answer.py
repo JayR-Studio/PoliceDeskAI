@@ -100,9 +100,31 @@ Rules:
     return styles.get(answer_style, styles["auto"])
 
 
-def generate_rag_answer(question, search_results, answer_style="auto"):
+def build_chat_history_context(chat_history=None):
     """
-    Generates a source-backed answer using only retrieved document chunks.
+    Converts recent chat history into a short context block.
+    This helps the AI understand follow-up questions.
+    """
+
+    if not chat_history:
+        return "No previous conversation context."
+
+    history_parts = []
+
+    for message in chat_history:
+        role = "Officer" if message.role == "user" else "PoliceDesk AI"
+
+        history_parts.append(
+            f"{role}: {message.content}"
+        )
+
+    return "\n".join(history_parts)
+
+
+def generate_rag_answer(question, search_results, answer_style="auto", chat_history=None):
+    """
+    Generates a source-backed answer using retrieved document chunks
+    and recent conversation context.
     """
 
     if not search_results:
@@ -113,16 +135,18 @@ def generate_rag_answer(question, search_results, answer_style="auto"):
 
     context = build_context(search_results)
     style_instruction = get_style_instruction(answer_style)
+    chat_history_context = build_chat_history_context(chat_history)
 
     system_message = f"""
 You are PoliceDesk AI, a police document assistant.
 
 Your highest priority rules:
 1. Answer using ONLY the provided source context.
-2. Do not invent procedures, laws, page numbers, sections, facts, or police rules.
-3. If the provided context does not contain enough information, say so clearly.
-4. Do not pretend to know what is not in the documents.
-5. Follow the selected answer style strictly.
+2. Use recent conversation context only to understand follow-up questions.
+3. Do not use chat history as an official source.
+4. Do not invent procedures, laws, page numbers, sections, facts, or police rules.
+5. If the provided source context does not contain enough information, say so clearly.
+6. Follow the selected answer style strictly.
 
 Safety and professionalism:
 - Give careful, lawful, professional guidance.
@@ -140,10 +164,13 @@ Source handling:
 """
 
     user_message = f"""
-Officer's question:
+Recent conversation context:
+{chat_history_context}
+
+Officer's current question:
 {question}
 
-Retrieved source context:
+Retrieved official source context:
 {context}
 
 Write the answer now.

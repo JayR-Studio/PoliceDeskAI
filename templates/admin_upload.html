@@ -98,5 +98,142 @@
     </p>
     {% endif %}
 </section>
+<section class="upload-card large-upload-card">
+    <h3>Large Document Upload</h3>
+    <p>
+        Use this for larger PDF, DOCX, or TXT files. The file uploads directly to Supabase Storage first.
+    </p>
+
+    <div class="upload-form">
+        <label for="largeTitle">Document title</label>
+        <input type="text" id="largeTitle" placeholder="Example: Police Manual">
+
+        <label for="largeCategory">Category</label>
+        <select id="largeCategory">
+            <option value="">Select category</option>
+            <option value="Police Manual">Police Manual</option>
+            <option value="Station Duties">Station Duties</option>
+            <option value="Traffic Duties">Traffic Duties</option>
+            <option value="Investigation">Investigation</option>
+            <option value="Human Rights">Human Rights</option>
+            <option value="Signals and Reports">Signals and Reports</option>
+            <option value="Administration">Administration</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <label for="largeDocument">Select document</label>
+        <input type="file" id="largeDocument" accept=".pdf,.docx,.txt">
+
+        <button type="button" class="primary-btn" id="largeUploadBtn">
+            Upload Large Document
+        </button>
+
+        <p class="upload-limit-note" id="largeUploadStatus">
+            Waiting for document selection.
+        </p>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+    const largeUploadBtn = document.getElementById("largeUploadBtn");
+    const largeUploadStatus = document.getElementById("largeUploadStatus");
+
+    largeUploadBtn.addEventListener("click", async function () {
+        const fileInput = document.getElementById("largeDocument");
+        const titleInput = document.getElementById("largeTitle");
+        const categoryInput = document.getElementById("largeCategory");
+
+        const file = fileInput.files[0];
+
+        if (!file) {
+            largeUploadStatus.textContent = "Please select a document first.";
+            return;
+        }
+
+        try {
+            largeUploadBtn.disabled = true;
+            largeUploadBtn.textContent = "Preparing upload...";
+            largeUploadStatus.textContent = "Requesting secure upload link...";
+
+            const configResponse = await fetch("{{ url_for('upload_config') }}");
+            const config = await configResponse.json();
+
+            const signedResponse = await fetch("{{ url_for('create_signed_upload') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    filename: file.name
+                })
+            });
+
+            const signedPayload = await signedResponse.json();
+
+            if (!signedResponse.ok) {
+                throw new Error(signedPayload.error || "Could not create signed upload URL.");
+            }
+
+            const supabaseClient = supabase.createClient(
+                config.supabase_url,
+                config.supabase_publishable_key
+            );
+
+            const signedData = signedPayload.signed_data;
+
+            const token = signedData.token || signedData.Token;
+            const path = signedPayload.storage_path;
+
+            largeUploadBtn.textContent = "Uploading...";
+            largeUploadStatus.textContent = "Uploading document directly to Supabase Storage...";
+
+            const { error: uploadError } = await supabaseClient
+                .storage
+                .from(config.bucket)
+                .uploadToSignedUrl(path, token, file);
+
+            if (uploadError) {
+                throw new Error(uploadError.message);
+            }
+
+            largeUploadBtn.textContent = "Processing...";
+            largeUploadStatus.textContent = "Upload complete. Processing document text and chunks...";
+
+            const processResponse = await fetch("{{ url_for('process_storage_document') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    title: titleInput.value,
+                    category: categoryInput.value,
+                    filename: file.name,
+                    storage_path: path,
+                    bucket: config.bucket
+                })
+            });
+
+            const processPayload = await processResponse.json();
+
+            if (!processResponse.ok) {
+                throw new Error(processPayload.error || "Document processing failed.");
+            }
+
+            largeUploadStatus.textContent = processPayload.message;
+            largeUploadBtn.textContent = "Uploaded Successfully";
+
+            setTimeout(() => {
+                window.location.href = "{{ url_for('documents') }}";
+            }, 1200);
+
+        } catch (error) {
+            largeUploadStatus.textContent = error.message;
+            largeUploadBtn.disabled = false;
+            largeUploadBtn.textContent = "Upload Large Document";
+        }
+    });
+</script>
 {% endif %}
 {% endblock %}

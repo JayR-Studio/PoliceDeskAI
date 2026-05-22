@@ -87,3 +87,22 @@ def delete_document_from_storage(storage_path, bucket=None):
     print("Supabase delete response:", response)
 
     return True
+
+
+def download_document_from_storage(storage_path, local_file_path, bucket=None):
+    """
+    Downloads a document from Supabase Storage to a local temp path.
+    """
+
+    if not storage_path:
+        raise ValueError("Storage path is required.")
+
+    supabase = get_supabase_client()
+    bucket = bucket or get_storage_bucket()
+
+    response = supabase.storage.from_(bucket).download(storage_path)
+
+    with open(local_file_path, "wb") as file:
+        file.write(response)
+
+    return local_file_path

@@ -141,6 +141,129 @@ with app.app_context():
             print(f"Local migration warning: {e}")
 
 
+@app.route("/admin/upload-config")
+@admin_required
+def upload_config():
+    return {
+        "supabase_url": os.getenv("SUPABASE_URL"),
+        "supabase_publishable_key": os.getenv("SUPABASE_PUBLISHABLE_KEY"),
+        "bucket": os.getenv("SUPABASE_STORAGE_BUCKET", "police-documents")
+    }
+
+
+@app.route("/admin/process-storage-document", methods=["POST"])
+@admin_required
+def process_storage_document():
+    data = request.get_json()
+
+    title = data.get("title", "").strip()
+    category = data.get("category", "").strip()
+    filename = secure_filename(data.get("filename", ""))
+    storage_path = data.get("storage_path", "")
+    storage_bucket = data.get("bucket", os.getenv("SUPABASE_STORAGE_BUCKET", "police-documents"))
+
+    if not filename or not storage_path:
+        return {"error": "Filename and storage path are required."}, 400
+
+    file_type = filename.rsplit(".", 1)[1].lower()
+
+    temp_filename = f"{uuid.uuid4().hex[:12]}_{filename}"
+    temp_path = os.path.join("/tmp", temp_filename)
+
+    try:
+        from services.storage_service import download_document_from_storage
+
+        download_document_from_storage(
+            storage_path=storage_path,
+            local_file_path=temp_path,
+            bucket=storage_bucket
+        )
+
+        extracted_text = extract_text(temp_path)
+
+        if not extracted_text:
+            return {"error": "No readable text was found in this document."}, 400
+
+        chunks = split_text_into_chunks(extracted_text)
+
+        if not title:
+            title = filename.rsplit(".", 1)[0]
+
+        saved_document = Document(
+            title=title,
+            filename=filename,
+            file_type=file_type,
+            category=category if category else None,
+            total_chunks=len(chunks),
+            storage_bucket=storage_bucket,
+            storage_path=storage_path,
+            storage_url=None
+        )
+
+        db.session.add(saved_document)
+        db.session.flush()
+
+        for chunk in chunks:
+            saved_chunk = DocumentChunk(
+                document_id=saved_document.id,
+                chunk_number=chunk["chunk_number"],
+                chunk_text=chunk["text"],
+                word_count=chunk["word_count"],
+                page_start=chunk.get("page_start"),
+                page_end=chunk.get("page_end")
+            )
+            db.session.add(saved_chunk)
+
+        db.session.commit()
+
+        return {
+            "success": True,
+            "message": f"{filename} uploaded and processed successfully.",
+            "document_id": saved_document.id,
+            "chunks": len(chunks)
+        }
+
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 500
+
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+
+@app.route("/admin/create-signed-upload", methods=["POST"])
+@admin_required
+def create_signed_upload():
+    data = request.get_json()
+
+    filename = secure_filename(data.get("filename", ""))
+
+    if not filename:
+        return {"error": "Filename is required."}, 400
+
+    if not allowed_file(filename):
+        return {"error": "Only PDF, DOCX, and TXT files are allowed."}, 400
+
+    from services.storage_service import get_supabase_client, get_storage_bucket, build_storage_path
+
+    supabase = get_supabase_client()
+    bucket = get_storage_bucket()
+    storage_path = build_storage_path(filename)
+
+    try:
+        signed_data = supabase.storage.from_(bucket).create_signed_upload_url(storage_path)
+
+        return {
+            "bucket": bucket,
+            "storage_path": storage_path,
+            "signed_data": signed_data
+        }
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+
 @app.route("/db-test")
 @admin_required
 def db_test():

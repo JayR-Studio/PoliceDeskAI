@@ -34,70 +34,6 @@
 <p class="upload-limit-note">
     Current direct upload limit: 4MB. Larger document upload support will be added in the next upgrade.
 </p>
-
-{% if saved_document %}
-<section class="preview-card saved-card">
-    <h3>Document Saved</h3>
-    <p><strong>Title:</strong> {{ saved_document.title }}</p>
-    <p><strong>Filename:</strong> {{ saved_document.filename }}</p>
-    <p><strong>Category:</strong> {{ saved_document.category or "Uncategorized" }}</p>
-    <p><strong>Total chunks:</strong> {{ saved_document.total_chunks }}</p>
-</section>
-{% endif %}
-
-{% if extracted_text %}
-<section class="preview-card">
-    <div class="preview-header">
-        <div>
-            <h3>Extracted Text Preview</h3>
-            <p>{{ uploaded_filename }}</p>
-        </div>
-    </div>
-
-    <pre class="text-preview">{{ extracted_text[:3000] }}</pre>
-
-    {% if extracted_text|length > 3000 %}
-    <p class="preview-note">
-        Showing first 3,000 characters only. Full extraction was successful.
-    </p>
-    {% endif %}
-</section>
-{% endif %}
-
-{% if chunks %}
-<section class="preview-card">
-    <div class="preview-header">
-        <div>
-            <h3>RAG Chunks Preview</h3>
-            <p>{{ chunks|length }} chunks created from this document.</p>
-        </div>
-    </div>
-
-    <div class="chunk-list">
-        {% for chunk in chunks[:5] %}
-        <article class="chunk-card">
-            <div class="chunk-meta">
-                <strong>Chunk {{ chunk.chunk_number }}</strong>
-
-                <span>
-                    {{ chunk.word_count }} words
-                    {% if chunk.page_start %}
-                        • Page {{ chunk.page_start }}{% if chunk.page_end and chunk.page_end != chunk.page_start %}–{{ chunk.page_end }}{% endif %}
-                    {% endif %}
-                </span>
-            </div>
-
-            <p>{{ chunk.text[:800] }}{% if chunk.text|length > 800 %}...{% endif %}</p>
-        </article>
-        {% endfor %}
-    </div>
-
-    {% if chunks|length > 5 %}
-    <p class="preview-note">
-        Showing first 5 chunks only. Full chunking was successful.
-    </p>
-    {% endif %}
-</section>
 <section class="upload-card large-upload-card">
     <h3>Large Document Upload</h3>
     <p>
@@ -235,5 +171,69 @@
         }
     });
 </script>
+{% if saved_document %}
+<section class="preview-card saved-card">
+    <h3>Document Saved</h3>
+    <p><strong>Title:</strong> {{ saved_document.title }}</p>
+    <p><strong>Filename:</strong> {{ saved_document.filename }}</p>
+    <p><strong>Category:</strong> {{ saved_document.category or "Uncategorized" }}</p>
+    <p><strong>Total chunks:</strong> {{ saved_document.total_chunks }}</p>
+</section>
+{% endif %}
+
+{% if extracted_text %}
+<section class="preview-card">
+    <div class="preview-header">
+        <div>
+            <h3>Extracted Text Preview</h3>
+            <p>{{ uploaded_filename }}</p>
+        </div>
+    </div>
+
+    <pre class="text-preview">{{ extracted_text[:3000] }}</pre>
+
+    {% if extracted_text|length > 3000 %}
+    <p class="preview-note">
+        Showing first 3,000 characters only. Full extraction was successful.
+    </p>
+    {% endif %}
+</section>
+{% endif %}
+
+{% if chunks %}
+<section class="preview-card">
+    <div class="preview-header">
+        <div>
+            <h3>RAG Chunks Preview</h3>
+            <p>{{ chunks|length }} chunks created from this document.</p>
+        </div>
+    </div>
+
+    <div class="chunk-list">
+        {% for chunk in chunks[:5] %}
+        <article class="chunk-card">
+            <div class="chunk-meta">
+                <strong>Chunk {{ chunk.chunk_number }}</strong>
+
+                <span>
+                    {{ chunk.word_count }} words
+                    {% if chunk.page_start %}
+                        • Page {{ chunk.page_start }}{% if chunk.page_end and chunk.page_end != chunk.page_start %}–{{ chunk.page_end }}{% endif %}
+                    {% endif %}
+                </span>
+            </div>
+
+            <p>{{ chunk.text[:800] }}{% if chunk.text|length > 800 %}...{% endif %}</p>
+        </article>
+        {% endfor %}
+    </div>
+
+    {% if chunks|length > 5 %}
+    <p class="preview-note">
+        Showing first 5 chunks only. Full chunking was successful.
+    </p>
+    {% endif %}
+</section>
+
 {% endif %}
 {% endblock %}

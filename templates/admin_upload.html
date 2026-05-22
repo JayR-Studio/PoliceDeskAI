@@ -32,7 +32,7 @@
 <!--</section>-->
 
 <p class="upload-limit-note">
-    Current direct upload limit: 4MB. Larger document upload support will be added in the next upgrade.
+    Files are uploaded directly to Supabase Storage to avoid Vercel payload limits. Large PDFs may take longer to process after upload.
 </p>
 <section class="upload-card large-upload-card">
     <h3>Document Upload</h3>
@@ -61,7 +61,7 @@
         <input type="file" id="largeDocument" accept=".pdf,.docx,.txt">
 
         <button type="button" class="primary-btn" id="largeUploadBtn">
-            Upload Large Document
+            Upload Document
         </button>
 
         <p class="upload-limit-note" id="largeUploadStatus">

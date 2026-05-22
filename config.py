@@ -10,8 +10,7 @@ def str_to_bool(value):
 def normalize_database_url(database_url):
     """
     Makes database URLs compatible with SQLAlchemy.
-    Supabase may provide postgres://, but SQLAlchemy works better with
-    postgresql+psycopg2:// for our setup.
+    For Vercel, we use pg8000 because it is pure Python and avoids psycopg2 import issues.
     """
     if not database_url:
         return f"sqlite:///{os.path.join(BASE_DIR, 'policedesk.db')}"
@@ -19,14 +18,21 @@ def normalize_database_url(database_url):
     if database_url.startswith("postgres://"):
         database_url = database_url.replace(
             "postgres://",
-            "postgresql+psycopg2://",
+            "postgresql+pg8000://",
             1
         )
 
     if database_url.startswith("postgresql://"):
         database_url = database_url.replace(
             "postgresql://",
+            "postgresql+pg8000://",
+            1
+        )
+
+    if database_url.startswith("postgresql+psycopg2://"):
+        database_url = database_url.replace(
             "postgresql+psycopg2://",
+            "postgresql+pg8000://",
             1
         )
 

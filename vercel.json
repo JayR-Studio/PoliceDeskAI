@@ -12,6 +12,14 @@
       "dest": "/static/$1"
     },
     {
+      "src": "/favicon.ico",
+      "dest": "/static/favicon.ico"
+    },
+    {
+      "src": "/favicon.png",
+      "dest": "/static/favicon.png"
+    },
+    {
       "src": "/(.*)",
       "dest": "app.py"
     }

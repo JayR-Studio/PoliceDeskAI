@@ -7,37 +7,37 @@
     <h3>Upload Police Document</h3>
     <p>Upload PDF, DOCX, or TXT files. The system will extract, chunk, and save the document.</p>
 
-    <form method="POST" enctype="multipart/form-data" class="upload-form">
-        <label for="title">Document title</label>
-        <input type="text" name="title" id="title" placeholder="Example: Police Manual - Duties">
+<!--    <form method="POST" enctype="multipart/form-data" class="upload-form">-->
+<!--        <label for="title">Document title</label>-->
+<!--        <input type="text" name="title" id="title" placeholder="Example: Police Manual - Duties">-->
 
-        <label for="category">Category</label>
-        <select name="category" id="category">
-            <option value="">Select category</option>
-            <option value="Police Manual">Police Manual</option>
-            <option value="Station Duties">Station Duties</option>
-            <option value="Traffic Duties">Traffic Duties</option>
-            <option value="Investigation">Investigation</option>
-            <option value="Human Rights">Human Rights</option>
-            <option value="Signals and Reports">Signals and Reports</option>
-            <option value="Administration">Administration</option>
-            <option value="Other">Other</option>
-        </select>
+<!--        <label for="category">Category</label>-->
+<!--        <select name="category" id="category">-->
+<!--            <option value="">Select category</option>-->
+<!--            <option value="Police Manual">Police Manual</option>-->
+<!--            <option value="Station Duties">Station Duties</option>-->
+<!--            <option value="Traffic Duties">Traffic Duties</option>-->
+<!--            <option value="Investigation">Investigation</option>-->
+<!--            <option value="Human Rights">Human Rights</option>-->
+<!--            <option value="Signals and Reports">Signals and Reports</option>-->
+<!--            <option value="Administration">Administration</option>-->
+<!--            <option value="Other">Other</option>-->
+<!--        </select>-->
 
-        <label for="document">Select document</label>
-        <input type="file" name="document" id="document" accept=".pdf,.docx,.txt" required>
+<!--        <label for="document">Select document</label>-->
+<!--        <input type="file" name="document" id="document" accept=".pdf,.docx,.txt" required>-->
 
-        <button type="submit" class="primary-btn">Upload, Extract & Save</button>
-    </form>
-</section>
+<!--        <button type="submit" class="primary-btn">Upload, Extract & Save</button>-->
+<!--    </form>-->
+<!--</section>-->
 
 <p class="upload-limit-note">
     Current direct upload limit: 4MB. Larger document upload support will be added in the next upgrade.
 </p>
 <section class="upload-card large-upload-card">
-    <h3>Large Document Upload</h3>
+    <h3>Document Upload</h3>
     <p>
-        Use this for larger PDF, DOCX, or TXT files. The file uploads directly to Supabase Storage first.
+        Use this for PDF, DOCX, or TXT files. The file uploads directly to Supabase Storage first.
     </p>
 
     <div class="upload-form">

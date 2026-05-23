@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block page_title %}CBT Practice{% endblock %}
+
+{% block content %}
+<section class="cbt-shell">
+    <div class="cbt-hero">
+        <div>
+            <p class="reader-eyebrow">AI Learning Mode</p>
+            <h3>CBT Practice</h3>
+            <p>
+                Select official documents and generate practice questions to test your understanding.
+            </p>
+        </div>
+    </div>
+
+    <div class="cbt-layout">
+        <section class="cbt-card">
+            <div class="cbt-card-header">
+                <h4>Create CBT Exam</h4>
+                <p>Select between 1 and 4 documents.</p>
+            </div>
+
+            <form method="POST" class="cbt-form" id="cbtForm">
+                <div class="cbt-document-list">
+                    {% if documents %}
+                        {% for document in documents %}
+                            <label class="cbt-document-option">
+                                <input 
+                                    type="checkbox" 
+                                    name="document_ids" 
+                                    value="{{ document.id }}"
+                                    class="cbt-document-checkbox"
+                                >
+
+                                <span>
+                                    <strong>{{ document.title }}</strong>
+                                    <small>
+                                        {{ document.category or "Uncategorized" }}
+                                        • {{ document.total_chunks }} sections
+                                    </small>
+                                </span>
+                            </label>
+                        {% endfor %}
+                    {% else %}
+                        <p class="empty-documents-text">
+                            No documents available yet.
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div class="cbt-settings">
+                    <label for="question_count">Number of questions</label>
+                    <select name="question_count" id="question_count">
+                        <option value="10">10 questions</option>
+                        <option value="20">20 questions</option>
+                        <option value="30">30 questions</option>
+                    </select>
+                </div>
+
+                <p class="upload-limit-note" id="selectedCountText">
+                    Select at least 1 document. Maximum 4.
+                </p>
+
+                <button type="submit" class="primary-btn" id="startCbtBtn">
+                    Start CBT
+                </button>
+            </form>
+        </section>
+
+        <aside class="cbt-side-panel">
+            <section class="cbt-card">
+                <div class="cbt-card-header">
+                    <h4>Score History</h4>
+                    <p>Your recent CBT attempts will appear here.</p>
+                </div>
+
+                {% if recent_sessions %}
+                    <div class="score-history-list">
+                        {% for session in recent_sessions %}
+                            <div class="score-history-item">
+                                <strong>{{ session.title or "CBT Session" }}</strong>
+                                <p>
+                                    Score: {{ session.score }}/{{ session.total_questions }}
+                                    • {{ "%.1f"|format(session.percentage or 0) }}%
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-mini-state">
+                        <p>No CBT attempts yet.</p>
+                    </div>
+                {% endif %}
+            </section>
+
+            <section class="cbt-card">
+                <div class="cbt-card-header">
+                    <h4>AI Study Recommendation</h4>
+                    <p>After taking CBT exams, recommendations will appear here.</p>
+                </div>
+
+                <div class="ai-recommendation-box">
+                    <p>
+                        Complete your first CBT test to receive AI-guided study suggestions.
+                    </p>
+                </div>
+            </section>
+        </aside>
+    </div>
+</section>
+
+<script>
+    const checkboxes = document.querySelectorAll(".cbt-document-checkbox");
+    const selectedCountText = document.getElementById("selectedCountText");
+    const startCbtBtn = document.getElementById("startCbtBtn");
+
+    function updateSelectionState() {
+        const selected = Array.from(checkboxes).filter((checkbox) => checkbox.checked);
+
+        selectedCountText.textContent = `${selected.length} document(s) selected. Minimum 1, maximum 4.`;
+
+        if (selected.length > 4) {
+            selectedCountText.textContent = "You can only select a maximum of 4 documents.";
+            selectedCountText.classList.add("error-text");
+            startCbtBtn.disabled = true;
+        } else {
+            selectedCountText.classList.remove("error-text");
+            startCbtBtn.disabled = selected.length < 1;
+        }
+    }
+
+    checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", updateSelectionState);
+    });
+
+    updateSelectionState();
+</script>
+{% endblock %}

@@ -74,3 +74,53 @@ class ChatMessage(db.Model):
     sources_json = db.Column(db.Text, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.now)
+
+
+class CBTSession(db.Model):
+    __tablename__ = "cbt_sessions"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    title = db.Column(db.String(255), nullable=True)
+    selected_document_ids = db.Column(db.Text, nullable=False)
+
+    total_questions = db.Column(db.Integer, default=10)
+    score = db.Column(db.Integer, nullable=True)
+    percentage = db.Column(db.Float, nullable=True)
+
+    status = db.Column(db.String(50), default="created")
+    recommendation = db.Column(db.Text, nullable=True)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    completed_at = db.Column(db.DateTime, nullable=True)
+
+    questions = db.relationship(
+        "CBTQuestion",
+        backref="session",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+
+class CBTQuestion(db.Model):
+    __tablename__ = "cbt_questions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey("cbt_sessions.id"), nullable=False)
+
+    question_text = db.Column(db.Text, nullable=False)
+
+    option_a = db.Column(db.Text, nullable=False)
+    option_b = db.Column(db.Text, nullable=False)
+    option_c = db.Column(db.Text, nullable=False)
+    option_d = db.Column(db.Text, nullable=False)
+
+    correct_answer = db.Column(db.String(1), nullable=False)
+    user_answer = db.Column(db.String(1), nullable=True)
+
+    explanation = db.Column(db.Text, nullable=True)
+
+    source_document_id = db.Column(db.Integer, db.ForeignKey("documents.id"), nullable=True)
+    source_chunk_id = db.Column(db.Integer, db.ForeignKey("document_chunks.id"), nullable=True)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

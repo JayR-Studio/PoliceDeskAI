@@ -2500,3 +2500,215 @@ html[data-theme="light"] .source-text-box {
     padding-top: 16px;
     border-top: 1px solid var(--border);
 }
+
+/* ================================
+   CBT Practice
+   ================================ */
+
+.cbt-shell {
+    display: grid;
+    gap: 18px;
+}
+
+.cbt-hero {
+    background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.14), transparent 38%),
+        var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: var(--shadow-soft, 0 14px 35px rgba(15, 23, 42, 0.06));
+}
+
+.cbt-hero h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 28px;
+}
+
+.cbt-hero p {
+    margin: 8px 0 0;
+    color: var(--muted);
+}
+
+.cbt-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 18px;
+    align-items: start;
+}
+
+.cbt-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow: var(--shadow-soft, 0 14px 35px rgba(15, 23, 42, 0.06));
+}
+
+.cbt-card-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+}
+
+.cbt-card-header h4 {
+    margin: 0;
+    color: var(--text);
+    font-size: 20px;
+}
+
+.cbt-card-header p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.cbt-form {
+    display: grid;
+    gap: 16px;
+}
+
+.cbt-document-list {
+    display: grid;
+    gap: 10px;
+    max-height: 520px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.cbt-document-option {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--card-soft, #f8fafc);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+}
+
+.cbt-document-option:hover {
+    transform: translateY(-1px);
+    border-color: rgba(56, 189, 248, 0.45);
+    background: rgba(56, 189, 248, 0.07);
+}
+
+.cbt-document-option input {
+    margin-top: 4px;
+    accent-color: #2563eb;
+}
+
+.cbt-document-option span {
+    display: grid;
+    gap: 4px;
+}
+
+.cbt-document-option strong {
+    color: var(--text);
+    font-size: 15px;
+}
+
+.cbt-document-option small {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.cbt-settings {
+    display: grid;
+    gap: 8px;
+}
+
+.cbt-settings label {
+    color: var(--text);
+    font-weight: 800;
+    font-size: 14px;
+}
+
+.cbt-settings select {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--card-soft, #f8fafc);
+    color: var(--text);
+    border-radius: 14px;
+    padding: 13px;
+    font-weight: 700;
+}
+
+.error-text {
+    color: var(--error) !important;
+    font-weight: 800;
+}
+
+.cbt-side-panel {
+    display: grid;
+    gap: 18px;
+    position: sticky;
+    top: 18px;
+}
+
+.score-history-list {
+    display: grid;
+    gap: 10px;
+}
+
+.score-history-item {
+    background: var(--card-soft, #f8fafc);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+}
+
+.score-history-item strong {
+    color: var(--text);
+}
+
+.score-history-item p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.empty-mini-state,
+.ai-recommendation-box {
+    background: var(--card-soft, #f8fafc);
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+@media (max-width: 950px) {
+    .cbt-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .cbt-side-panel {
+        position: relative;
+        top: 0;
+    }
+
+    .cbt-document-list {
+        max-height: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .cbt-hero,
+    .cbt-card {
+        padding: 16px;
+        border-radius: 18px;
+    }
+
+    .cbt-hero h3 {
+        font-size: 22px;
+    }
+
+    .cbt-document-option {
+        padding: 12px;
+        border-radius: 14px;
+    }
+}

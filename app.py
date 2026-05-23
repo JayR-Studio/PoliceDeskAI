@@ -16,7 +16,7 @@ from services.chunker import split_text_into_chunks
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from werkzeug.utils import secure_filename
 from config import Config
-from models import db, Document, DocumentChunk, ChatSession, ChatMessage
+from models import db, Document, DocumentChunk, ChatSession, ChatMessage, CBTSession, CBTQuestion
 from datetime import datetime, timedelta
 from sqlalchemy import text
 
@@ -989,9 +989,75 @@ def health_check():
     }, 200
 
 
-@app.route("/cbt")
+# --------------------------------------------------------------------------------------------------------------
+#                                    CBT FEATURE
+# ---------------------------------------------------------------------------------------------------------------
+
+
+@app.route("/cbt", methods=["GET", "POST"])
 def cbt():
-    return render_template("coming_soon.html", feature_name="CBT Practice")
+    documents = Document.query.order_by(Document.created_at.desc()).all()
+
+    recent_sessions = (
+        CBTSession.query
+        .filter(CBTSession.score.isnot(None))
+        .order_by(CBTSession.created_at.desc())
+        .limit(5)
+        .all()
+    )
+
+    if request.method == "POST":
+        selected_documents = request.form.getlist("document_ids")
+
+        if len(selected_documents) < 1:
+            flash("Please select at least one document.", "error")
+            return redirect(url_for("cbt"))
+
+        if len(selected_documents) > 4:
+            flash("You can select a maximum of 4 documents for one CBT exam.", "error")
+            return redirect(url_for("cbt"))
+
+        question_count = request.form.get("question_count", "10")
+
+        try:
+            question_count = int(question_count)
+        except ValueError:
+            question_count = 10
+
+        if question_count not in [10, 20, 30]:
+            question_count = 10
+
+        selected_titles = []
+
+        for document_id in selected_documents:
+            document = Document.query.get(int(document_id))
+
+            if document:
+                selected_titles.append(document.title)
+
+        session_title = " + ".join(selected_titles[:2])
+
+        if len(selected_titles) > 2:
+            session_title += f" + {len(selected_titles) - 2} more"
+
+        cbt_session = CBTSession(
+            title=session_title,
+            selected_document_ids=",".join(selected_documents),
+            total_questions=question_count,
+            status="created"
+        )
+
+        db.session.add(cbt_session)
+        db.session.commit()
+
+        flash("CBT session created. Question generation will be added next.", "success")
+        return redirect(url_for("cbt"))
+
+    return render_template(
+        "cbt.html",
+        documents=documents,
+        recent_sessions=recent_sessions
+    )
 
 
 @app.route("/summaries")

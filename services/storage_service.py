@@ -1,5 +1,6 @@
 import os
 import uuid
+import mimetypes
 from datetime import datetime
 from supabase import create_client
 from werkzeug.utils import secure_filename

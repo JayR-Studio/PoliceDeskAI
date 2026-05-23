@@ -7,233 +7,264 @@
     <h3>Upload Police Document</h3>
     <p>Upload PDF, DOCX, or TXT files. The system will extract, chunk, and save the document.</p>
 
-<!--    <form method="POST" enctype="multipart/form-data" class="upload-form">-->
-<!--        <label for="title">Document title</label>-->
-<!--        <input type="text" name="title" id="title" placeholder="Example: Police Manual - Duties">-->
+    <!--    <form method="POST" enctype="multipart/form-data" class="upload-form">-->
+    <!--        <label for="title">Document title</label>-->
+    <!--        <input type="text" name="title" id="title" placeholder="Example: Police Manual - Duties">-->
 
-<!--        <label for="category">Category</label>-->
-<!--        <select name="category" id="category">-->
-<!--            <option value="">Select category</option>-->
-<!--            <option value="Police Manual">Police Manual</option>-->
-<!--            <option value="Station Duties">Station Duties</option>-->
-<!--            <option value="Traffic Duties">Traffic Duties</option>-->
-<!--            <option value="Investigation">Investigation</option>-->
-<!--            <option value="Human Rights">Human Rights</option>-->
-<!--            <option value="Signals and Reports">Signals and Reports</option>-->
-<!--            <option value="Administration">Administration</option>-->
-<!--            <option value="Other">Other</option>-->
-<!--        </select>-->
+    <!--        <label for="category">Category</label>-->
+    <!--        <select name="category" id="category">-->
+    <!--            <option value="">Select category</option>-->
+    <!--            <option value="Police Manual">Police Manual</option>-->
+    <!--            <option value="Station Duties">Station Duties</option>-->
+    <!--            <option value="Traffic Duties">Traffic Duties</option>-->
+    <!--            <option value="Investigation">Investigation</option>-->
+    <!--            <option value="Human Rights">Human Rights</option>-->
+    <!--            <option value="Signals and Reports">Signals and Reports</option>-->
+    <!--            <option value="Administration">Administration</option>-->
+    <!--            <option value="Other">Other</option>-->
+    <!--        </select>-->
 
-<!--        <label for="document">Select document</label>-->
-<!--        <input type="file" name="document" id="document" accept=".pdf,.docx,.txt" required>-->
+    <!--        <label for="document">Select document</label>-->
+    <!--        <input type="file" name="document" id="document" accept=".pdf,.docx,.txt" required>-->
 
-<!--        <button type="submit" class="primary-btn">Upload, Extract & Save</button>-->
-<!--    </form>-->
-<!--</section>-->
+    <!--        <button type="submit" class="primary-btn">Upload, Extract & Save</button>-->
+    <!--    </form>-->
+    <!--</section>-->
 
-<p class="upload-limit-note">
-    Files are uploaded directly to Supabase Storage to avoid Vercel payload limits. Large PDFs may take longer to process after upload.
-</p>
-<section class="upload-card large-upload-card">
-    <h3>Document Upload</h3>
-    <p>
-        Use this for PDF, DOCX, or TXT files. The file uploads directly to Supabase Storage first.
+    <p class="upload-limit-note">
+        Files are uploaded directly to Supabase Storage to avoid Vercel payload limits. Large PDFs may take longer to
+        process after upload.
     </p>
-
-    <div class="upload-form">
-        <label for="largeTitle">Document title</label>
-        <input type="text" id="largeTitle" placeholder="Example: Police Manual">
-
-        <label for="largeCategory">Category</label>
-        <select id="largeCategory">
-            <option value="">Select category</option>
-            <option value="Police Manual">Police Manual</option>
-            <option value="Station Duties">Station Duties</option>
-            <option value="Traffic Duties">Traffic Duties</option>
-            <option value="Investigation">Investigation</option>
-            <option value="Human Rights">Human Rights</option>
-            <option value="Signals and Reports">Signals and Reports</option>
-            <option value="Administration">Administration</option>
-            <option value="Other">Other</option>
-        </select>
-
-        <label for="largeDocument">Select document</label>
-        <input type="file" id="largeDocument" accept=".pdf,.docx,.txt">
-
-        <button type="button" class="primary-btn" id="largeUploadBtn">
-            Upload Document
-        </button>
-
-        <p class="upload-limit-note" id="largeUploadStatus">
-            Waiting for document selection.
+    <section class="upload-card large-upload-card">
+        <h3>Document Upload</h3>
+        <p>
+            Use this for PDF, DOCX, or TXT files. The file uploads directly to Supabase Storage first.
         </p>
-    </div>
-</section>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <div class="upload-form">
+            <label for="largeTitle">Document title</label>
+            <input type="text" id="largeTitle" placeholder="Example: Police Manual">
 
-<script>
-    const largeUploadBtn = document.getElementById("largeUploadBtn");
-    const largeUploadStatus = document.getElementById("largeUploadStatus");
+            <label for="largeCategory">Category</label>
+            <select id="largeCategory">
+                <option value="">Select category</option>
+                <option value="Police Manual">Police Manual</option>
+                <option value="Station Duties">Station Duties</option>
+                <option value="Traffic Duties">Traffic Duties</option>
+                <option value="Investigation">Investigation</option>
+                <option value="Human Rights">Human Rights</option>
+                <option value="Signals and Reports">Signals and Reports</option>
+                <option value="Administration">Administration</option>
+                <option value="Other">Other</option>
+            </select>
 
-    largeUploadBtn.addEventListener("click", async function () {
-        const fileInput = document.getElementById("largeDocument");
-        const titleInput = document.getElementById("largeTitle");
-        const categoryInput = document.getElementById("largeCategory");
+            <label for="largeDocument">Select document</label>
+            <input type="file" id="largeDocument" accept=".pdf,.docx,.txt">
 
-        const file = fileInput.files[0];
+            <button type="button" class="primary-btn" id="largeUploadBtn">
+                Upload Document
+            </button>
 
-        if (!file) {
-            largeUploadStatus.textContent = "Please select a document first.";
-            return;
-        }
+            <p class="upload-limit-note" id="largeUploadStatus">
+                Waiting for document selection.
+            </p>
+        </div>
+    </section>
 
-        try {
-            largeUploadBtn.disabled = true;
-            largeUploadBtn.textContent = "Preparing upload...";
-            largeUploadStatus.textContent = "Requesting secure upload link...";
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-            const configResponse = await fetch("{{ url_for('upload_config') }}");
-            const config = await configResponse.json();
+    <script>
+        const largeUploadBtn = document.getElementById("largeUploadBtn");
+        const largeUploadStatus = document.getElementById("largeUploadStatus");
 
-            const signedResponse = await fetch("{{ url_for('create_signed_upload') }}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    filename: file.name
-                })
-            });
+        largeUploadBtn.addEventListener("click", async function () {
+            const fileInput = document.getElementById("largeDocument");
+            const titleInput = document.getElementById("largeTitle");
+            const categoryInput = document.getElementById("largeCategory");
 
-            const signedPayload = await signedResponse.json();
+            const file = fileInput.files[0];
 
-            if (!signedResponse.ok) {
-                throw new Error(signedPayload.error || "Could not create signed upload URL.");
+            if (!file) {
+                largeUploadStatus.textContent = "Please select a document first.";
+                return;
             }
 
-            const supabaseClient = supabase.createClient(
-                config.supabase_url,
-                config.supabase_publishable_key
-            );
+            try {
+                largeUploadBtn.disabled = true;
+                largeUploadBtn.textContent = "Preparing upload...";
+                largeUploadStatus.textContent = "Requesting secure upload link...";
 
-            const signedData = signedPayload.signed_data;
+                const configResponse = await fetch("{{ url_for('upload_config') }}");
+                const config = await configResponse.json();
 
-            const token = signedData.token || signedData.Token;
-            const path = signedPayload.storage_path;
+                const signedResponse = await fetch("{{ url_for('create_signed_upload') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        filename: file.name
+                    })
+                });
 
-            largeUploadBtn.textContent = "Uploading...";
-            largeUploadStatus.textContent = "Uploading document directly to Supabase Storage...";
+                const signedPayload = await signedResponse.json();
+
+                if (!signedResponse.ok) {
+                    throw new Error(signedPayload.error || "Could not create signed upload URL.");
+                }
+
+                const supabaseClient = supabase.createClient(
+                    config.supabase_url,
+                    config.supabase_publishable_key
+                );
+
+                const signedData = signedPayload.signed_data;
+
+                const token = signedData.token || signedData.Token;
+                const path = signedPayload.storage_path;
+
+                largeUploadBtn.textContent = "Uploading...";
+                largeUploadStatus.textContent = "Uploading document directly to Supabase Storage...";
+
+                function getContentType(file) {
+
+                if (file.type) {
+                    return file.type;
+                }
+
+                const filename = file.name.toLowerCase();
+
+                if (filename.endsWith(".pdf")) {
+                    return "application/pdf";
+                }
+
+                if (filename.endsWith(".docx")) {
+                    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                }
+
+                if (filename.endsWith(".txt")) {
+                    return "text/plain";
+                }
+
+                return "application/octet-stream";
+            }
 
             const { error: uploadError } = await supabaseClient
                 .storage
                 .from(config.bucket)
-                .uploadToSignedUrl(path, token, file);
+                .uploadToSignedUrl(
+                    path,
+                    token,
+                    file,
+                    {
+                        contentType: getContentType(file)
+                    }
+                );
 
-            if (uploadError) {
-                throw new Error(uploadError.message);
+                if (uploadError) {
+                    throw new Error(uploadError.message);
+                }
+
+                largeUploadBtn.textContent = "Processing...";
+                largeUploadStatus.textContent = "Upload complete. Processing document text and chunks...";
+
+                const processResponse = await fetch("{{ url_for('process_storage_document') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        title: titleInput.value,
+                        category: categoryInput.value,
+                        filename: file.name,
+                        storage_path: path,
+                        bucket: config.bucket
+                    })
+                });
+
+                const processPayload = await processResponse.json();
+
+                if (!processResponse.ok) {
+                    throw new Error(processPayload.error || "Document processing failed.");
+                }
+
+                largeUploadStatus.textContent = processPayload.message;
+                largeUploadBtn.textContent = "Uploaded Successfully";
+
+                setTimeout(() => {
+                    window.location.href = "{{ url_for('documents') }}";
+                }, 1200);
+
+            } catch (error) {
+                largeUploadStatus.textContent = error.message;
+                largeUploadBtn.disabled = false;
+                largeUploadBtn.textContent = "Upload Large Document";
             }
-
-            largeUploadBtn.textContent = "Processing...";
-            largeUploadStatus.textContent = "Upload complete. Processing document text and chunks...";
-
-            const processResponse = await fetch("{{ url_for('process_storage_document') }}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    title: titleInput.value,
-                    category: categoryInput.value,
-                    filename: file.name,
-                    storage_path: path,
-                    bucket: config.bucket
-                })
-            });
-
-            const processPayload = await processResponse.json();
-
-            if (!processResponse.ok) {
-                throw new Error(processPayload.error || "Document processing failed.");
-            }
-
-            largeUploadStatus.textContent = processPayload.message;
-            largeUploadBtn.textContent = "Uploaded Successfully";
-
-            setTimeout(() => {
-                window.location.href = "{{ url_for('documents') }}";
-            }, 1200);
-
-        } catch (error) {
-            largeUploadStatus.textContent = error.message;
-            largeUploadBtn.disabled = false;
-            largeUploadBtn.textContent = "Upload Large Document";
-        }
-    });
-</script>
-{% if saved_document %}
-<section class="preview-card saved-card">
-    <h3>Document Saved</h3>
-    <p><strong>Title:</strong> {{ saved_document.title }}</p>
-    <p><strong>Filename:</strong> {{ saved_document.filename }}</p>
-    <p><strong>Category:</strong> {{ saved_document.category or "Uncategorized" }}</p>
-    <p><strong>Total chunks:</strong> {{ saved_document.total_chunks }}</p>
-</section>
-{% endif %}
-
-{% if extracted_text %}
-<section class="preview-card">
-    <div class="preview-header">
-        <div>
-            <h3>Extracted Text Preview</h3>
-            <p>{{ uploaded_filename }}</p>
-        </div>
-    </div>
-
-    <pre class="text-preview">{{ extracted_text[:3000] }}</pre>
-
-    {% if extracted_text|length > 3000 %}
-    <p class="preview-note">
-        Showing first 3,000 characters only. Full extraction was successful.
-    </p>
+        });
+    </script>
+    {% if saved_document %}
+    <section class="preview-card saved-card">
+        <h3>Document Saved</h3>
+        <p><strong>Title:</strong> {{ saved_document.title }}</p>
+        <p><strong>Filename:</strong> {{ saved_document.filename }}</p>
+        <p><strong>Category:</strong> {{ saved_document.category or "Uncategorized" }}</p>
+        <p><strong>Total chunks:</strong> {{ saved_document.total_chunks }}</p>
+    </section>
     {% endif %}
-</section>
-{% endif %}
 
-{% if chunks %}
-<section class="preview-card">
-    <div class="preview-header">
-        <div>
-            <h3>RAG Chunks Preview</h3>
-            <p>{{ chunks|length }} chunks created from this document.</p>
+    {% if extracted_text %}
+    <section class="preview-card">
+        <div class="preview-header">
+            <div>
+                <h3>Extracted Text Preview</h3>
+                <p>{{ uploaded_filename }}</p>
+            </div>
         </div>
-    </div>
 
-    <div class="chunk-list">
-        {% for chunk in chunks[:5] %}
-        <article class="chunk-card">
-            <div class="chunk-meta">
-                <strong>Chunk {{ chunk.chunk_number }}</strong>
+        <pre class="text-preview">{{ extracted_text[:3000] }}</pre>
 
-                <span>
+        {% if extracted_text|length > 3000 %}
+        <p class="preview-note">
+            Showing first 3,000 characters only. Full extraction was successful.
+        </p>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    {% if chunks %}
+    <section class="preview-card">
+        <div class="preview-header">
+            <div>
+                <h3>RAG Chunks Preview</h3>
+                <p>{{ chunks|length }} chunks created from this document.</p>
+            </div>
+        </div>
+
+        <div class="chunk-list">
+            {% for chunk in chunks[:5] %}
+            <article class="chunk-card">
+                <div class="chunk-meta">
+                    <strong>Chunk {{ chunk.chunk_number }}</strong>
+
+                    <span>
                     {{ chunk.word_count }} words
                     {% if chunk.page_start %}
                         • Page {{ chunk.page_start }}{% if chunk.page_end and chunk.page_end != chunk.page_start %}–{{ chunk.page_end }}{% endif %}
                     {% endif %}
                 </span>
-            </div>
+                </div>
 
-            <p>{{ chunk.text[:800] }}{% if chunk.text|length > 800 %}...{% endif %}</p>
-        </article>
-        {% endfor %}
-    </div>
+                <p>{{ chunk.text[:800] }}{% if chunk.text|length > 800 %}...{% endif %}</p>
+            </article>
+            {% endfor %}
+        </div>
 
-    {% if chunks|length > 5 %}
-    <p class="preview-note">
-        Showing first 5 chunks only. Full chunking was successful.
-    </p>
+        {% if chunks|length > 5 %}
+        <p class="preview-note">
+            Showing first 5 chunks only. Full chunking was successful.
+        </p>
+        {% endif %}
+    </section>
+
     {% endif %}
-</section>
-
-{% endif %}
-{% endblock %}
+    {% endblock %}

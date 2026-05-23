@@ -448,7 +448,6 @@ def admin_upload():
 
 
 @app.route("/documents")
-@admin_required
 def documents():
     all_documents = Document.query.order_by(Document.created_at.desc()).all()
 
@@ -939,7 +938,6 @@ def read_document(document_id):
 
 
 @app.route("/documents/<int:document_id>/view-original")
-@admin_required
 def view_original_document(document_id):
     document = Document.query.get_or_404(document_id)
 
@@ -961,27 +959,26 @@ def view_original_document(document_id):
         return redirect(url_for("documents"))
 
 
-@app.route("/documents/<int:document_id>/download")
-@admin_required
-def download_original_document(document_id):
-    document = Document.query.get_or_404(document_id)
-
-    if not document.storage_path:
-        flash("This document does not have a stored file to download.", "error")
-        return redirect(url_for("documents"))
-
-    try:
-        signed_url = create_signed_document_url(
-            storage_path=document.storage_path,
-            bucket=document.storage_bucket,
-            expires_in=3600
-        )
-
-        return redirect(signed_url)
-
-    except Exception as e:
-        flash(f"Could not download document: {str(e)}", "error")
-        return redirect(url_for("documents"))
+# @app.route("/documents/<int:document_id>/download")
+# def download_original_document(document_id):
+#     document = Document.query.get_or_404(document_id)
+#
+#     if not document.storage_path:
+#         flash("This document does not have a stored file to download.", "error")
+#         return redirect(url_for("documents"))
+#
+#     try:
+#         signed_url = create_signed_document_url(
+#             storage_path=document.storage_path,
+#             bucket=document.storage_bucket,
+#             expires_in=3600
+#         )
+#
+#         return redirect(signed_url)
+#
+#     except Exception as e:
+#         flash(f"Could not download document: {str(e)}", "error")
+#         return redirect(url_for("documents"))
 
 
 @app.route("/health")
@@ -990,6 +987,16 @@ def health_check():
         "status": "ok",
         "app": "PoliceDesk AI"
     }, 200
+
+
+@app.route("/cbt")
+def cbt():
+    return render_template("coming_soon.html", feature_name="CBT Practice")
+
+
+@app.route("/summaries")
+def summaries():
+    return render_template("coming_soon.html", feature_name="Document Summaries")
 
 
 if __name__ == "__main__":

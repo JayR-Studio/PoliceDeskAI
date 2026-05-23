@@ -13,28 +13,26 @@
 </section>
 
 <section class="quick-grid">
-    <div class="quick-card">
-        <div class="icon">🚔</div>
-        <h4>Accident Scene</h4>
-        <p>Get quick procedural guidance.</p>
-    </div>
+    <div class="quick-grid">
+        <a href="{{ url_for('documents') }}" class="quick-card dashboard-feature-card">
+            <div class="icon">📚</div>
+            <h4>Library</h4>
+            <p>Read, view, and download official police documents.</p>
+        </a>
 
-    <div class="quick-card">
-        <div class="icon">📝</div>
-        <h4>Statement Taking</h4>
-        <p>Reference proper documentation steps.</p>
-    </div>
+        <a href="#" class="quick-card dashboard-feature-card coming-soon-card">
+            <div class="icon">📝</div>
+            <h4>CBT</h4>
+            <p>Practice with AI-generated quiz questions from official documents.</p>
+            <span>Coming soon</span>
+        </a>
 
-    <div class="quick-card">
-        <div class="icon">⚖️</div>
-        <h4>Human Rights</h4>
-        <p>Stay guided by lawful procedure.</p>
-    </div>
-
-    <div class="quick-card">
-        <div class="icon">📄</div>
-        <h4>Case Diary</h4>
-        <p>Prepare better investigation records.</p>
+        <a href="#" class="quick-card dashboard-feature-card coming-soon-card">
+            <div class="icon">✨</div>
+            <h4>Summaries</h4>
+            <p>Generate simple summaries from uploaded police documents.</p>
+            <span>Coming soon</span>
+        </a>
     </div>
 </section>
 {% endblock %}

@@ -21,10 +21,10 @@
         <nav>
             <a href="{{ url_for('index') }}">Dashboard</a>
             <a href="{{ url_for('chat') }}">Ask Manual</a>
+            <a href="{{ url_for('documents') }}">Library</a>
 
             {% if session.get("is_admin") %}
             <a href="{{ url_for('admin_upload') }}">Upload Documents</a>
-            <a href="{{ url_for('documents') }}">Documents</a>
             {% endif %}
         </nav>
         {% if session.get("is_admin") %}

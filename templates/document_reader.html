@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block body_class %}reader-page{% endblock %}
+
 {% block page_title %}Document Reader{% endblock %}
 
 {% block content %}
@@ -12,41 +14,47 @@
                 {{ document.category or "Uncategorized" }}
                 • {{ document.file_type|upper }}
             </p>
+
+            <a href="{{ url_for('documents') }}" class="reader-back-link">
+                ← Back to Documents
+            </a>
         </div>
 
         <div class="reader-mobile-select">
             <label for="chunkSelect">Jump to section</label>
             <select id="chunkSelect">
                 {% for chunk in chunks %}
-                    <option 
+                <option
                         value="{{ url_for('read_document', document_id=document.id, chunk_id=chunk.id) }}"
-                        {% if selected_chunk and chunk.id == selected_chunk.id %}selected{% endif %}
-                    >
-                        Section {{ chunk.chunk_number }}
-                        {% if chunk.page_start %}
-                            — Page {{ chunk.page_start }}{% if chunk.page_end and chunk.page_end != chunk.page_start %}–{{ chunk.page_end }}{% endif %}
-                        {% endif %}
-                    </option>
+                        {% if selected_chunk and chunk.id== selected_chunk.id %}selected{% endif %}
+                >
+                    Section {{ chunk.chunk_number }}
+                    {% if chunk.page_start %}
+                    — Page {{ chunk.page_start }}{% if chunk.page_end and chunk.page_end != chunk.page_start %}–{{
+                    chunk.page_end }}{% endif %}
+                    {% endif %}
+                </option>
                 {% endfor %}
             </select>
         </div>
 
         <nav class="reader-section-list">
             {% for chunk in chunks %}
-                <a 
+            <a
                     href="{{ url_for('read_document', document_id=document.id, chunk_id=chunk.id) }}"
                     class="reader-section-link {% if selected_chunk and chunk.id == selected_chunk.id %}active{% endif %}"
-                >
-                    <span>Section {{ chunk.chunk_number }}</span>
+            >
+                <span>Section {{ chunk.chunk_number }}</span>
 
-                    {% if chunk.page_start %}
-                        <small>
-                            Page {{ chunk.page_start }}{% if chunk.page_end and chunk.page_end != chunk.page_start %}–{{ chunk.page_end }}{% endif %}
-                        </small>
-                    {% else %}
-                        <small>{{ chunk.word_count }} words</small>
-                    {% endif %}
-                </a>
+                {% if chunk.page_start %}
+                <small>
+                    Page {{ chunk.page_start }}{% if chunk.page_end and chunk.page_end != chunk.page_start %}–{{
+                    chunk.page_end }}{% endif %}
+                </small>
+                {% else %}
+                <small>{{ chunk.word_count }} words</small>
+                {% endif %}
+            </a>
             {% endfor %}
         </nav>
     </aside>
@@ -57,17 +65,17 @@
                 <p class="reader-eyebrow">Reading Section</p>
 
                 {% if selected_chunk %}
-                    <h2>
-                        Section {{ selected_chunk.chunk_number }}
+                <h2>
+                    Section {{ selected_chunk.chunk_number }}
 
-                        {% if selected_chunk.page_start %}
-                            <span>
+                    {% if selected_chunk.page_start %}
+                    <span>
                                 Page {{ selected_chunk.page_start }}{% if selected_chunk.page_end and selected_chunk.page_end != selected_chunk.page_start %}–{{ selected_chunk.page_end }}{% endif %}
                             </span>
-                        {% endif %}
-                    </h2>
+                    {% endif %}
+                </h2>
                 {% else %}
-                    <h2>No readable content</h2>
+                <h2>No readable content</h2>
                 {% endif %}
             </div>
 
@@ -85,51 +93,59 @@
         </div>
 
         {% if selected_chunk %}
-            <article class="reader-content-card">
-                <div class="reader-progress-line">
-                    <span>Section {{ current_index + 1 }} of {{ chunks|length }}</span>
-                    <div>
-                        <div style="width: {{ ((current_index + 1) / chunks|length * 100)|round }}%;"></div>
-                    </div>
+        <article class="reader-content-card">
+            <div class="reader-progress-line">
+                <span>Section {{ current_index + 1 }} of {{ chunks|length }}</span>
+                <div>
+                    <div style="width: {{ ((current_index + 1) / chunks|length * 100)|round }}%;"></div>
                 </div>
+            </div>
 
-                <div class="reader-text">
-                    {{ selected_chunk.chunk_text | replace('\n', '<br>') | safe }}
-                </div>
-            </article>
+            <div class="reader-text">
+                {% set paragraphs = selected_chunk.chunk_text.split('. ') %}
 
-            <div class="reader-bottom-nav">
-                {% if previous_chunk %}
-                    <a 
-                        href="{{ url_for('read_document', document_id=document.id, chunk_id=previous_chunk.id) }}" 
-                        class="secondary-btn"
-                    >
-                        Previous
-                    </a>
-                {% else %}
-                    <button class="secondary-btn" disabled>Previous</button>
+                {% for paragraph in paragraphs %}
+                {% if paragraph.strip() %}
+                <p>
+                    {{ paragraph.strip() }}{% if not paragraph.strip().endswith('.') %}.{% endif %}
+                </p>
                 {% endif %}
+                {% endfor %}
+            </div>
+        </article>
 
-                <span>
+        <div class="reader-bottom-nav">
+            {% if previous_chunk %}
+            <a
+                    href="{{ url_for('read_document', document_id=document.id, chunk_id=previous_chunk.id) }}"
+                    class="secondary-btn"
+            >
+                Previous
+            </a>
+            {% else %}
+            <button class="secondary-btn" disabled>Previous</button>
+            {% endif %}
+
+            <span>
                     {{ current_index + 1 }} / {{ chunks|length }}
                 </span>
 
-                {% if next_chunk %}
-                    <a 
-                        href="{{ url_for('read_document', document_id=document.id, chunk_id=next_chunk.id) }}" 
-                        class="primary-btn"
-                    >
-                        Next
-                    </a>
-                {% else %}
-                    <button class="primary-btn" disabled>Next</button>
-                {% endif %}
-            </div>
+            {% if next_chunk %}
+            <a
+                    href="{{ url_for('read_document', document_id=document.id, chunk_id=next_chunk.id) }}"
+                    class="primary-btn"
+            >
+                Next
+            </a>
+            {% else %}
+            <button class="primary-btn" disabled>Next</button>
+            {% endif %}
+        </div>
         {% else %}
-            <div class="empty-reader-state">
-                <h3>No readable chunks found</h3>
-                <p>This document has no extracted text chunks.</p>
-            </div>
+        <div class="empty-reader-state">
+            <h3>No readable chunks found</h3>
+            <p>This document has no extracted text chunks.</p>
+        </div>
         {% endif %}
     </main>
 </section>

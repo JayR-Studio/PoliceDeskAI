@@ -106,3 +106,30 @@ def download_document_from_storage(storage_path, local_file_path, bucket=None):
         file.write(response)
 
     return local_file_path
+
+def create_signed_document_url(storage_path, bucket=None, expires_in=3600):
+    """
+    Creates a temporary signed URL for viewing/downloading a private document.
+    expires_in is in seconds.
+    """
+
+    if not storage_path:
+        raise ValueError("Storage path is required.")
+
+    supabase = get_supabase_client()
+    bucket = bucket or get_storage_bucket()
+
+    response = supabase.storage.from_(bucket).create_signed_url(
+        path=storage_path,
+        expires_in=expires_in
+    )
+
+    if isinstance(response, dict):
+        signed_url = response.get("signedURL") or response.get("signedUrl") or response.get("signed_url")
+    else:
+        signed_url = getattr(response, "signed_url", None) or getattr(response, "signedURL", None)
+
+    if not signed_url:
+        raise ValueError(f"Could not create signed URL. Response: {response}")
+
+    return signed_url

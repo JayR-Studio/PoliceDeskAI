@@ -2302,3 +2302,63 @@ html[data-theme="light"] .source-text-box {
 .reader-back-link:hover {
     text-decoration: underline;
 }
+
+/* ================================
+   Document cards action polish
+   ================================ */
+
+.document-side-actions {
+    min-width: 170px;
+}
+
+.small-action-btn.primary-action {
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #ffffff;
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2);
+}
+
+.small-action-btn.secondary-action {
+    background: rgba(56, 189, 248, 0.08);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.small-action-btn.secondary-action:hover,
+.small-action-btn.primary-action:hover,
+.small-danger-btn:hover {
+    transform: translateY(-1px);
+}
+
+@media (max-width: 800px) {
+    .document-card {
+        align-items: stretch;
+    }
+
+    .document-side-actions {
+        width: 100%;
+        min-width: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .document-side-actions form {
+        margin: 0;
+    }
+
+    .document-side-actions .small-action-btn,
+    .document-side-actions .small-danger-btn {
+        width: 100%;
+        min-height: 42px;
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+        border-radius: 12px;
+    }
+}
+
+@media (max-width: 420px) {
+    .document-side-actions {
+        grid-template-columns: 1fr;
+    }
+}

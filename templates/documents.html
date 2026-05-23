@@ -45,12 +45,27 @@
             </div>
 
             <div class="document-side-actions">
-                        <span class="status-pill status-{{ item.status|lower|replace(' ', '-') }}">
-                            {{ item.status }}
-                        </span>
+                {% if document.storage_path %}
+                <a
+                        href="{{ url_for('view_original_document', document_id=document.id) }}"
+                        class="small-action-btn primary-action"
+                        target="_blank"
+                >
+                    View Original
+                </a>
 
-                <a href="{{ url_for('document_detail', document_id=document.id) }}" class="small-action-btn">
-                    View
+                <a
+                        href="{{ url_for('download_original_document', document_id=document.id) }}"
+                        class="small-action-btn secondary-action"
+                        target="_blank"
+                >
+                    Download
+                </a>
+                {% endif %}
+
+                <a href="{{ url_for('document_detail', document_id=document.id) }}"
+                   class="small-action-btn secondary-action">
+                    Details
                 </a>
 
                 <form
@@ -61,9 +76,6 @@
                     <button type="submit" class="small-danger-btn">
                         Delete
                     </button>
-                    <a href="{{ url_for('read_document', document_id=document.id) }}" class="small-action-btn">
-                        Read
-                    </a>
                 </form>
             </div>
         </article>

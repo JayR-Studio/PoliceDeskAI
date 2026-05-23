@@ -8,7 +8,8 @@ load_dotenv()
 from services.embeddings import create_embedding
 from services.retriever import semantic_search
 from services.ai_answer import generate_rag_answer
-from services.storage_service import upload_document_to_storage, delete_document_from_storage
+from services.storage_service import upload_document_to_storage, delete_document_from_storage, \
+    create_signed_document_url
 from services.document_loader import extract_text
 from services.chunker import split_text_into_chunks
 
@@ -23,7 +24,6 @@ ALLOWED_EXTENSIONS = {"pdf", "docx", "txt"}
 
 app = Flask(__name__)
 app.config.from_object(Config)
-
 
 if app.config["FLASK_ENV"] == "production" and app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite"):
     print("WARNING: SQLite is being used in production. Move to PostgreSQL before real deployment.")
@@ -882,9 +882,12 @@ def view_source(chunk_id):
         chunk=chunk
     )
 
+
 # --------------------------------------------------------------------------------------------------------------
 #                                    Read Document
-#---------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------
+
+
 @app.route("/documents/<int:document_id>/read")
 @admin_required
 def read_document(document_id):
@@ -933,6 +936,52 @@ def read_document(document_id):
         next_chunk=next_chunk,
         current_index=current_index
     )
+
+
+@app.route("/documents/<int:document_id>/view-original")
+@admin_required
+def view_original_document(document_id):
+    document = Document.query.get_or_404(document_id)
+
+    if not document.storage_path:
+        flash("This document does not have a stored original file.", "error")
+        return redirect(url_for("documents"))
+
+    try:
+        signed_url = create_signed_document_url(
+            storage_path=document.storage_path,
+            bucket=document.storage_bucket,
+            expires_in=3600
+        )
+
+        return redirect(signed_url)
+
+    except Exception as e:
+        flash(f"Could not open original document: {str(e)}", "error")
+        return redirect(url_for("documents"))
+
+
+@app.route("/documents/<int:document_id>/download")
+@admin_required
+def download_original_document(document_id):
+    document = Document.query.get_or_404(document_id)
+
+    if not document.storage_path:
+        flash("This document does not have a stored file to download.", "error")
+        return redirect(url_for("documents"))
+
+    try:
+        signed_url = create_signed_document_url(
+            storage_path=document.storage_path,
+            bucket=document.storage_bucket,
+            expires_in=3600
+        )
+
+        return redirect(signed_url)
+
+    except Exception as e:
+        flash(f"Could not download document: {str(e)}", "error")
+        return redirect(url_for("documents"))
 
 
 @app.route("/health")

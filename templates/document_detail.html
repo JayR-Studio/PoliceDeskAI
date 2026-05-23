@@ -51,6 +51,9 @@
             <button type="submit" class="danger-btn">
                 Delete This Document
             </button>
+            <a href="{{ url_for('read_document', document_id=document.id) }}" class="secondary-btn">
+                Extracted Text Preview
+            </a>
         </form>
     </div>
 </section>

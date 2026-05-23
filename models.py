@@ -123,4 +123,26 @@ class CBTQuestion(db.Model):
     source_document_id = db.Column(db.Integer, db.ForeignKey("documents.id"), nullable=True)
     source_chunk_id = db.Column(db.Integer, db.ForeignKey("document_chunks.id"), nullable=True)
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+
+
+class CBTQuestionBank(db.Model):
+    __tablename__ = "cbt_question_bank"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    document_id = db.Column(db.Integer, db.ForeignKey("documents.id"), nullable=False)
+    source_chunk_id = db.Column(db.Integer, db.ForeignKey("document_chunks.id"), nullable=True)
+
+    question_text = db.Column(db.Text, nullable=False)
+
+    option_a = db.Column(db.Text, nullable=False)
+    option_b = db.Column(db.Text, nullable=False)
+    option_c = db.Column(db.Text, nullable=False)
+    option_d = db.Column(db.Text, nullable=False)
+
+    correct_answer = db.Column(db.String(1), nullable=False)
+    explanation = db.Column(db.Text, nullable=True)
+
+    difficulty = db.Column(db.String(50), default="standard")
+    created_at = db.Column(db.DateTime, default=datetime.now)

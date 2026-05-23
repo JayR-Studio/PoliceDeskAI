@@ -2501,16 +2501,29 @@ html[data-theme="light"] .source-text-box {
     border-top: 1px solid var(--border);
 }
 
+
 /* ================================
-   CBT Practice
+   CBT Practice — Clean Rebuild
+   Replaces all previous CBT CSS.
+   Mobile-first safe layout with no horizontal overflow.
    ================================ */
 
+.cbt-shell,
+.cbt-shell * {
+    box-sizing: border-box;
+}
+
 .cbt-shell {
+    width: 100%;
+    max-width: 100%;
     display: grid;
     gap: 18px;
+    overflow-x: clip;
 }
 
 .cbt-hero {
+    width: 100%;
+    max-width: 100%;
     background:
         radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 34%),
         radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.14), transparent 38%),
@@ -2518,21 +2531,29 @@ html[data-theme="light"] .source-text-box {
     border: 1px solid var(--border);
     border-radius: 24px;
     padding: 24px;
-    box-shadow: var(--shadow-soft, 0 14px 35px rgba(15, 23, 42, 0.06));
+    box-shadow: var(--shadow-sm);
+    overflow-wrap: break-word;
 }
 
 .cbt-hero h3 {
     margin: 0;
     color: var(--text);
     font-size: 28px;
+    line-height: 1.2;
+    letter-spacing: -0.04em;
+    overflow-wrap: break-word;
 }
 
 .cbt-hero p {
     margin: 8px 0 0;
     color: var(--muted);
+    line-height: 1.6;
+    overflow-wrap: break-word;
 }
 
 .cbt-layout {
+    width: 100%;
+    max-width: 100%;
     display: grid;
     grid-template-columns: minmax(0, 1fr) 360px;
     gap: 18px;
@@ -2540,11 +2561,15 @@ html[data-theme="light"] .source-text-box {
 }
 
 .cbt-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 24px;
     padding: 20px;
-    box-shadow: var(--shadow-soft, 0 14px 35px rgba(15, 23, 42, 0.06));
+    box-shadow: var(--shadow-sm);
+    overflow-wrap: break-word;
 }
 
 .cbt-card-header {
@@ -2557,12 +2582,14 @@ html[data-theme="light"] .source-text-box {
     margin: 0;
     color: var(--text);
     font-size: 20px;
+    line-height: 1.3;
 }
 
 .cbt-card-header p {
     margin: 6px 0 0;
     color: var(--muted);
     font-size: 14px;
+    line-height: 1.55;
 }
 
 .cbt-form {
@@ -2575,14 +2602,23 @@ html[data-theme="light"] .source-text-box {
     gap: 10px;
     max-height: 520px;
     overflow-y: auto;
+    overflow-x: hidden;
     padding-right: 4px;
 }
 
+.cbt-document-bank-row {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
 .cbt-document-option {
+    width: 100%;
+    min-width: 0;
     display: flex;
     gap: 12px;
     align-items: flex-start;
-    background: var(--card-soft, #f8fafc);
+    background: var(--card-soft);
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 14px;
@@ -2597,11 +2633,13 @@ html[data-theme="light"] .source-text-box {
 }
 
 .cbt-document-option input {
+    flex: 0 0 auto;
     margin-top: 4px;
     accent-color: #2563eb;
 }
 
 .cbt-document-option span {
+    min-width: 0;
     display: grid;
     gap: 4px;
 }
@@ -2609,11 +2647,15 @@ html[data-theme="light"] .source-text-box {
 .cbt-document-option strong {
     color: var(--text);
     font-size: 15px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
 }
 
 .cbt-document-option small {
     color: var(--muted);
     font-size: 13px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
 }
 
 .cbt-settings {
@@ -2630,11 +2672,18 @@ html[data-theme="light"] .source-text-box {
 .cbt-settings select {
     width: 100%;
     border: 1px solid var(--border);
-    background: var(--card-soft, #f8fafc);
+    background: var(--card-soft);
     color: var(--text);
     border-radius: 14px;
     padding: 13px;
     font-weight: 700;
+}
+
+.cbt-generate-btn {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 13px;
+    border-radius: 12px;
 }
 
 .error-text {
@@ -2643,6 +2692,7 @@ html[data-theme="light"] .source-text-box {
 }
 
 .cbt-side-panel {
+    min-width: 0;
     display: grid;
     gap: 18px;
     position: sticky;
@@ -2654,11 +2704,23 @@ html[data-theme="light"] .source-text-box {
     gap: 10px;
 }
 
-.score-history-item {
-    background: var(--card-soft, #f8fafc);
+.score-history-item,
+.empty-mini-state,
+.ai-recommendation-box {
+    width: 100%;
+    max-width: 100%;
+    background: var(--card-soft);
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 14px;
+    overflow-wrap: break-word;
+}
+
+.empty-mini-state,
+.ai-recommendation-box {
+    border-style: dashed;
+    color: var(--muted);
+    line-height: 1.6;
 }
 
 .score-history-item strong {
@@ -2669,17 +2731,269 @@ html[data-theme="light"] .source-text-box {
     margin: 6px 0 0;
     color: var(--muted);
     font-size: 13px;
+    line-height: 1.5;
 }
 
-.empty-mini-state,
-.ai-recommendation-box {
-    background: var(--card-soft, #f8fafc);
-    border: 1px dashed var(--border);
-    border-radius: 16px;
-    padding: 16px;
-    color: var(--muted);
-    line-height: 1.6;
+/* ================================
+   CBT Exam Interface — Clean Rebuild
+   ================================ */
+
+.cbt-exam-form {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
 }
+
+.cbt-exam-layout {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.question-nav-panel {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 16px;
+    position: sticky;
+    top: 18px;
+    box-shadow: var(--shadow-sm);
+}
+
+.question-nav-panel h4 {
+    margin: 0 0 12px;
+    color: var(--text);
+    line-height: 1.3;
+}
+
+.question-nav-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.question-nav-btn {
+    min-width: 0;
+    border: 1px solid var(--border);
+    background: var(--card-soft);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 9px 0;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.question-nav-btn.active {
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: white;
+    border-color: transparent;
+}
+
+.question-nav-btn.answered {
+    border-color: rgba(15, 118, 110, 0.45);
+    box-shadow: inset 0 0 0 2px rgba(15, 118, 110, 0.12);
+}
+
+.question-main-panel {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    display: grid;
+    gap: 14px;
+}
+
+.exam-question-card {
+    display: none;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    overflow-wrap: break-word;
+}
+
+.exam-question-card.active {
+    display: block;
+}
+
+.exam-question-header span {
+    display: inline-block;
+    margin-bottom: 14px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.exam-question-card h4 {
+    color: var(--text);
+    font-size: 20px;
+    line-height: 1.6;
+    margin: 0 0 18px;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+.exam-options {
+    width: 100%;
+    max-width: 100%;
+    display: grid;
+    gap: 12px;
+}
+
+.exam-options label {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.exam-options label:hover {
+    border-color: rgba(56, 189, 248, 0.45);
+}
+
+.exam-options input {
+    margin-top: 4px;
+    accent-color: #2563eb;
+}
+
+.exam-options label span {
+    min-width: 0;
+    display: block;
+    line-height: 1.55;
+    overflow-wrap: break-word;
+    word-break: normal;
+    white-space: normal;
+}
+
+.exam-options label strong {
+    white-space: nowrap;
+}
+
+.exam-bottom-actions,
+.submit-exam-box {
+    width: 100%;
+    max-width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 14px;
+    display: grid;
+    align-items: center;
+    gap: 12px;
+}
+
+.exam-bottom-actions {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.exam-bottom-actions span {
+    color: var(--muted);
+    font-weight: 900;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.exam-bottom-actions .primary-btn,
+.exam-bottom-actions .secondary-btn,
+.submit-exam-box .primary-btn {
+    width: 100%;
+    min-width: 0;
+}
+
+.submit-exam-box {
+    justify-content: stretch;
+}
+
+/* ================================
+   CBT Result / Review — Clean Rebuild
+   ================================ */
+
+.generated-question-list {
+    width: 100%;
+    max-width: 100%;
+    display: grid;
+    gap: 16px;
+}
+
+.generated-question-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+    overflow-wrap: break-word;
+}
+
+.generated-question-card h4 {
+    margin: 0 0 10px;
+    color: var(--text);
+    line-height: 1.35;
+}
+
+.generated-question-card p {
+    color: var(--text);
+    line-height: 1.7;
+    overflow-wrap: break-word;
+}
+
+.generated-question-card ul {
+    margin: 14px 0;
+    padding-left: 20px;
+    color: var(--text);
+    line-height: 1.8;
+}
+
+.generated-question-card li {
+    overflow-wrap: break-word;
+}
+
+.answer-preview {
+    margin-top: 14px;
+    background: rgba(15, 118, 110, 0.1);
+    border: 1px solid rgba(15, 118, 110, 0.25);
+    border-radius: 14px;
+    padding: 12px;
+    color: var(--text);
+    line-height: 1.6;
+    overflow-wrap: break-word;
+}
+
+.result-hero {
+    border-color: rgba(15, 118, 110, 0.25);
+}
+
+.correct-review {
+    border-color: rgba(15, 118, 110, 0.35);
+}
+
+.wrong-review {
+    border-color: rgba(185, 28, 28, 0.35);
+}
+
+/* ================================
+   CBT Responsive Rules
+   ================================ */
 
 @media (max-width: 950px) {
     .cbt-layout {
@@ -2694,21 +3008,528 @@ html[data-theme="light"] .source-text-box {
     .cbt-document-list {
         max-height: none;
     }
+
+    .cbt-exam-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .question-nav-panel {
+        position: relative;
+        top: 0;
+    }
+
+    .question-nav-grid {
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+    }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
+    .main-content {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .cbt-shell {
+        gap: 10px;
+    }
+
     .cbt-hero,
     .cbt-card {
-        padding: 16px;
-        border-radius: 18px;
+        padding: 12px;
+        border-radius: 16px;
     }
 
     .cbt-hero h3 {
-        font-size: 22px;
+        font-size: 20px;
+    }
+
+    .cbt-hero p {
+        font-size: 12.5px;
+    }
+
+    .cbt-card-header {
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+    }
+
+    .cbt-card-header h4 {
+        font-size: 16px;
+    }
+
+    .cbt-card-header p {
+        font-size: 12.5px;
+    }
+
+    .cbt-form {
+        gap: 12px;
+    }
+
+    .cbt-document-list {
+        gap: 8px;
     }
 
     .cbt-document-option {
+        padding: 10px;
+        border-radius: 13px;
+        gap: 9px;
+    }
+
+    .cbt-document-option strong {
+        font-size: 13.5px;
+    }
+
+    .cbt-document-option small {
+        font-size: 11.5px;
+    }
+
+    .cbt-settings select {
+        padding: 10px;
+        border-radius: 11px;
+        font-size: 13px;
+    }
+
+    .cbt-generate-btn,
+    .cbt-form .primary-btn,
+    .cbt-form .secondary-btn {
+        padding: 10px 12px;
+        font-size: 13px;
+        border-radius: 11px;
+    }
+
+    .question-nav-panel {
+        padding: 10px;
+        border-radius: 15px;
+    }
+
+    .question-nav-panel h4 {
+        font-size: 15px;
+        margin-bottom: 8px;
+    }
+
+    .question-nav-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .question-nav-btn {
+        height: 34px;
+        padding: 0;
+        font-size: 12px;
+        border-radius: 9px;
+    }
+
+    .exam-question-card {
         padding: 12px;
+        border-radius: 16px;
+    }
+
+    .exam-question-header span {
+        font-size: 11.5px;
+        margin-bottom: 8px;
+    }
+
+    .exam-question-card h4 {
+        font-size: 14.5px;
+        line-height: 1.45;
+        margin-bottom: 12px;
+    }
+
+    .exam-options {
+        gap: 8px;
+    }
+
+    .exam-options label {
+        padding: 9px 10px;
+        border-radius: 12px;
+        gap: 8px;
+    }
+
+    .exam-options label span {
+        font-size: 12.5px;
+        line-height: 1.45;
+    }
+
+    .exam-options input {
+        transform: scale(0.85);
+        margin-top: 3px;
+    }
+
+    .exam-bottom-actions,
+    .submit-exam-box {
+        padding: 9px;
         border-radius: 14px;
+    }
+
+    .exam-bottom-actions {
+        gap: 6px;
+    }
+
+    .exam-bottom-actions .primary-btn,
+    .exam-bottom-actions .secondary-btn,
+    .submit-exam-box .primary-btn {
+        padding: 8px 7px;
+        font-size: 11.5px;
+        border-radius: 10px;
+        white-space: nowrap;
+    }
+
+    .exam-bottom-actions span {
+        font-size: 11.5px;
+    }
+
+    .generated-question-list {
+        gap: 10px;
+    }
+
+    .generated-question-card {
+        padding: 12px;
+        border-radius: 15px;
+    }
+
+    .generated-question-card h4 {
+        font-size: 14px;
+    }
+
+    .generated-question-card p,
+    .generated-question-card li,
+    .answer-preview {
+        font-size: 12.5px;
+        line-height: 1.5;
+    }
+
+    .generated-question-card ul {
+        padding-left: 16px;
+        margin: 8px 0;
+    }
+
+    .answer-preview {
+        padding: 10px;
+        border-radius: 12px;
+    }
+}
+
+@media (max-width: 420px) {
+    .question-nav-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .exam-bottom-actions {
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    }
+
+    .exam-bottom-actions .primary-btn,
+    .exam-bottom-actions .secondary-btn {
+        font-size: 11px;
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+}
+
+/* ================================
+   CBT Focused Mobile Layout Fix
+   ================================ */
+
+.cbt-page .topbar {
+    display: none;
+}
+
+.cbt-page .main-content {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+@media (max-width: 800px) {
+    .cbt-page .main-content {
+        padding: 8px;
+    }
+
+    .cbt-page .cbt-shell {
+        width: 100%;
+        max-width: 100%;
+        gap: 10px;
+    }
+
+    .cbt-page .cbt-hero {
+        padding: 12px;
+        border-radius: 16px;
+    }
+
+    .cbt-page .cbt-hero h3 {
+        font-size: 19px;
+        line-height: 1.25;
+    }
+
+    .cbt-page .cbt-hero p {
+        font-size: 12.5px;
+        line-height: 1.45;
+    }
+
+    .cbt-exam-page .cbt-exam-layout {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .cbt-exam-page .question-nav-panel {
+        width: 100%;
+        max-width: 100%;
+        position: relative;
+        top: 0;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 15px;
+    }
+
+    .cbt-exam-page .question-nav-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+    }
+
+    .cbt-exam-page .question-nav-btn {
+        height: 34px;
+        padding: 0;
+        font-size: 12px;
+        border-radius: 9px;
+    }
+
+    .cbt-exam-page .question-main-panel {
+        width: 100%;
+        max-width: 100%;
+        display: grid;
+        gap: 10px;
+    }
+
+    .cbt-exam-page .exam-question-card {
+        width: 100%;
+        max-width: 100%;
+        padding: 12px;
+        border-radius: 16px;
+    }
+
+    .cbt-exam-page .exam-question-card h4 {
+        font-size: 14.5px;
+        line-height: 1.45;
+        margin-bottom: 12px;
+        overflow-wrap: break-word;
+    }
+
+    .cbt-exam-page .exam-options {
+        width: 100%;
+        display: grid;
+        gap: 8px;
+    }
+
+    .cbt-exam-page .exam-options label {
+        width: 100%;
+        max-width: 100%;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 8px;
+        padding: 9px 10px;
+        border-radius: 12px;
+    }
+
+    .cbt-exam-page .exam-options label span {
+        min-width: 0;
+        font-size: 12.5px;
+        line-height: 1.45;
+        overflow-wrap: break-word;
+        white-space: normal;
+    }
+
+    .cbt-exam-page .exam-options input {
+        transform: scale(0.85);
+        margin-top: 3px;
+    }
+
+    .cbt-exam-page .exam-bottom-actions {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 6px;
+        padding: 9px;
+        border-radius: 14px;
+    }
+
+    .cbt-exam-page .exam-bottom-actions .primary-btn,
+    .cbt-exam-page .exam-bottom-actions .secondary-btn {
+        width: 100%;
+        min-width: 0;
+        padding: 8px 6px;
+        font-size: 11px;
+        border-radius: 10px;
+        white-space: nowrap;
+    }
+
+    .cbt-exam-page .exam-bottom-actions span {
+        font-size: 11.5px;
+        white-space: nowrap;
+    }
+
+    .cbt-exam-page .submit-exam-box {
+        padding: 9px;
+        border-radius: 14px;
+    }
+
+    .cbt-exam-page .submit-exam-box .primary-btn {
+        width: 100%;
+        padding: 10px;
+        font-size: 12.5px;
+        border-radius: 11px;
+    }
+
+    .cbt-result-page .generated-question-card {
+        width: 100%;
+        max-width: 100%;
+        padding: 12px;
+        border-radius: 15px;
+    }
+
+    .cbt-result-page .generated-question-card h4 {
+        font-size: 14px;
+    }
+
+    .cbt-result-page .generated-question-card p,
+    .cbt-result-page .generated-question-card li,
+    .cbt-result-page .answer-preview {
+        font-size: 12.5px;
+        line-height: 1.5;
+        overflow-wrap: break-word;
+    }
+
+    .cbt-result-page .generated-question-card ul {
+        padding-left: 16px;
+        margin: 8px 0;
+    }
+
+    .cbt-result-page .answer-preview {
+        padding: 10px;
+        border-radius: 12px;
+    }
+}
+
+/* ================================
+   CBT Final Mobile Polish
+   ================================ */
+
+@media (max-width: 700px) {
+    .cbt-page .main-content {
+        padding: 6px !important;
+    }
+
+    .cbt-page .cbt-shell {
+        gap: 8px !important;
+    }
+
+    /* Make CBT hero much smaller */
+    .cbt-page .cbt-hero {
+        padding: 10px 12px !important;
+        border-radius: 14px !important;
+    }
+
+    .cbt-page .cbt-hero .reader-eyebrow {
+        display: none !important;
+    }
+
+    .cbt-page .cbt-hero h3 {
+        font-size: 17px !important;
+        line-height: 1.2 !important;
+        margin: 0 0 5px !important;
+        word-break: break-word !important;
+    }
+
+    .cbt-page .cbt-hero p {
+        font-size: 12px !important;
+        line-height: 1.35 !important;
+        margin: 0 0 8px !important;
+    }
+
+    .cbt-page .cbt-hero .secondary-btn,
+    .cbt-page .cbt-hero .primary-btn {
+        padding: 9px 10px !important;
+        min-height: 38px !important;
+        font-size: 12.5px !important;
+        border-radius: 12px !important;
+    }
+
+    /* Compact question navigation */
+    .cbt-exam-page .question-nav-panel {
+        padding: 9px !important;
+        border-radius: 14px !important;
+    }
+
+    .cbt-exam-page .question-nav-panel h4 {
+        font-size: 14px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .cbt-exam-page .question-nav-grid {
+        gap: 6px !important;
+    }
+
+    .cbt-exam-page .question-nav-btn {
+        height: 32px !important;
+        font-size: 12px !important;
+        border-radius: 9px !important;
+    }
+
+    /* Compact question card */
+    .cbt-exam-page .exam-question-card {
+        padding: 11px !important;
+        border-radius: 14px !important;
+    }
+
+    .cbt-exam-page .exam-question-header span {
+        font-size: 11px !important;
+        margin-bottom: 7px !important;
+    }
+
+    .cbt-exam-page .exam-question-card h4 {
+        font-size: 14px !important;
+        line-height: 1.42 !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* Compact options */
+    .cbt-exam-page .exam-options {
+        gap: 7px !important;
+    }
+
+    .cbt-exam-page .exam-options label {
+        padding: 8px 9px !important;
+        border-radius: 11px !important;
+        gap: 7px !important;
+    }
+
+    .cbt-exam-page .exam-options label span {
+        font-size: 12px !important;
+        line-height: 1.38 !important;
+    }
+
+    .cbt-exam-page .exam-options input {
+        margin-top: 2px !important;
+        transform: scale(0.8) !important;
+    }
+
+    /* Compact bottom buttons */
+    .cbt-exam-page .exam-bottom-actions,
+    .cbt-exam-page .submit-exam-box {
+        padding: 8px !important;
+        border-radius: 13px !important;
+    }
+
+    .cbt-exam-page .exam-bottom-actions .primary-btn,
+    .cbt-exam-page .exam-bottom-actions .secondary-btn,
+    .cbt-exam-page .submit-exam-box .primary-btn {
+        min-height: 34px !important;
+        padding: 7px 6px !important;
+        font-size: 11px !important;
+        border-radius: 9px !important;
+    }
+}
+
+@media (max-width: 700px) {
+    .cbt-page .cbt-hero h3 {
+        max-width: 100%;
+        overflow-wrap: anywhere !important;
     }
 }

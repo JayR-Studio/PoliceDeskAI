@@ -45,11 +45,13 @@
                 <p class="eyebrow">Trusted. Secure. Built for policing.</p>
                 <h2>{% block page_title %}{% endblock %}</h2>
             </div>
+
             <div class="theme-bar">
                 <button type="button" class="theme-toggle" data-theme-toggle>
                     <span class="theme-toggle-icon" data-theme-icon>☀️</span>
                     <span data-theme-label>Light</span>
                 </button>
+            </div>
         </header>
 
         {% with messages = get_flashed_messages(with_categories=true) %}

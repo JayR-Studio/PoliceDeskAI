@@ -25,22 +25,35 @@
                 <div class="cbt-document-list">
                     {% if documents %}
                         {% for document in documents %}
-                            <label class="cbt-document-option">
-                                <input 
-                                    type="checkbox" 
-                                    name="document_ids" 
-                                    value="{{ document.id }}"
-                                    class="cbt-document-checkbox"
-                                >
+                            <div class="cbt-document-bank-row">
+                                <label class="cbt-document-option">
+                                    <input
+                                        type="checkbox"
+                                        name="document_ids"
+                                        value="{{ document.id }}"
+                                        class="cbt-document-checkbox"
+                                    >
 
-                                <span>
-                                    <strong>{{ document.title }}</strong>
-                                    <small>
-                                        {{ document.category or "Uncategorized" }}
-                                        • {{ document.total_chunks }} sections
-                                    </small>
-                                </span>
-                            </label>
+                                    <span>
+                                        <strong>{{ document.title }}</strong>
+                                        <small>
+                                            {{ document.category or "Uncategorized" }}
+                                            • {{ document.total_chunks }} sections
+                                            • {{ document_question_counts.get(document.id, 0) }}/50 CBT questions
+                                        </small>
+                                    </span>
+                                </label>
+
+                                {% if session.get("is_admin") %}
+                                    <button
+                                        type="submit"
+                                        form="generate-bank-form-{{ document.id }}"
+                                        class="secondary-btn cbt-generate-btn"
+                                    >
+                                        Generate Questions
+                                    </button>
+                                {% endif %}
+                            </div>
                         {% endfor %}
                     {% else %}
                         <p class="empty-documents-text">
@@ -66,6 +79,17 @@
                     Start CBT
                 </button>
             </form>
+
+            {% if session.get("is_admin") %}
+                {% for document in documents %}
+                    <form
+                        id="generate-bank-form-{{ document.id }}"
+                        method="POST"
+                        action="{{ url_for('generate_cbt_bank', document_id=document.id) }}"
+                        class="hidden-generate-form"
+                    ></form>
+                {% endfor %}
+            {% endif %}
         </section>
 
         <aside class="cbt-side-panel">

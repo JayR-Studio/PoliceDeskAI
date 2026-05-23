@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block body_class %}cbt-page cbt-exam-page{% endblock %}
+
+{% block page_title %}Take CBT{% endblock %}
+
+{% block content %}
+<section class="cbt-shell">
+    <div class="cbt-hero">
+        <div>
+            <p class="reader-eyebrow">CBT Exam</p>
+            <h3>{{ cbt_session.title or "CBT Session" }}</h3>
+            <p>
+                Answer all questions before submitting. You can move between questions.
+            </p>
+        </div>
+
+        <a href="{{ url_for('cbt') }}" class="secondary-btn">Back to CBT</a>
+    </div>
+
+    {% if questions %}
+        <form method="POST" action="{{ url_for('submit_cbt', session_id=cbt_session.id) }}" class="cbt-exam-form">
+            <div class="cbt-exam-layout">
+                <aside class="question-nav-panel">
+                    <h4>Questions</h4>
+
+                    <div class="question-nav-grid">
+                        {% for question in questions %}
+                            <button
+                                type="button"
+                                class="question-nav-btn {% if loop.first %}active{% endif %}"
+                                data-question-index="{{ loop.index0 }}"
+                            >
+                                {{ loop.index }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </aside>
+
+                <main class="question-main-panel">
+                    {% for question in questions %}
+                        <article
+                            class="exam-question-card {% if loop.first %}active{% endif %}"
+                            data-question-card="{{ loop.index0 }}"
+                        >
+                            <div class="exam-question-header">
+                                <span>Question {{ loop.index }} of {{ questions|length }}</span>
+                            </div>
+
+                            <h4>{{ question.question_text }}</h4>
+
+                            <div class="exam-options">
+                                <label>
+                                    <input type="radio" name="question_{{ question.id }}" value="A">
+                                    <span><strong>A.</strong> {{ question.option_a }}</span>
+                                </label>
+
+                                <label>
+                                    <input type="radio" name="question_{{ question.id }}" value="B">
+                                    <span><strong>B.</strong> {{ question.option_b }}</span>
+                                </label>
+
+                                <label>
+                                    <input type="radio" name="question_{{ question.id }}" value="C">
+                                    <span><strong>C.</strong> {{ question.option_c }}</span>
+                                </label>
+
+                                <label>
+                                    <input type="radio" name="question_{{ question.id }}" value="D">
+                                    <span><strong>D.</strong> {{ question.option_d }}</span>
+                                </label>
+                            </div>
+                        </article>
+                    {% endfor %}
+
+                    <div class="exam-bottom-actions">
+                        <button type="button" class="secondary-btn" id="prevQuestionBtn">Previous</button>
+                        <span id="questionCounter">1 / {{ questions|length }}</span>
+                        <button type="button" class="primary-btn" id="nextQuestionBtn">Next</button>
+                    </div>
+
+                    <div class="submit-exam-box">
+                        <button
+                            type="submit"
+                            class="primary-btn"
+                            onclick="return confirm('Are you sure you want to submit this CBT exam?');"
+                        >
+                            Submit CBT
+                        </button>
+                    </div>
+                </main>
+            </div>
+        </form>
+    {% else %}
+        <div class="cbt-card">
+            <p>No questions found for this CBT session.</p>
+        </div>
+    {% endif %}
+</section>
+
+<script>
+    const questionCards = document.querySelectorAll("[data-question-card]");
+    const navButtons = document.querySelectorAll(".question-nav-btn");
+    const prevBtn = document.getElementById("prevQuestionBtn");
+    const nextBtn = document.getElementById("nextQuestionBtn");
+    const counter = document.getElementById("questionCounter");
+
+    let currentIndex = 0;
+
+    function showQuestion(index) {
+        if (index < 0 || index >= questionCards.length) {
+            return;
+        }
+
+        currentIndex = index;
+
+        questionCards.forEach((card) => {
+            card.classList.remove("active");
+        });
+
+        navButtons.forEach((button) => {
+            button.classList.remove("active");
+        });
+
+        questionCards[currentIndex].classList.add("active");
+        navButtons[currentIndex].classList.add("active");
+
+        counter.textContent = `${currentIndex + 1} / ${questionCards.length}`;
+
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex === questionCards.length - 1;
+    }
+
+    navButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+            showQuestion(Number(this.dataset.questionIndex));
+        });
+    });
+
+    prevBtn.addEventListener("click", function () {
+        showQuestion(currentIndex - 1);
+    });
+
+    nextBtn.addEventListener("click", function () {
+        showQuestion(currentIndex + 1);
+    });
+
+    document.querySelectorAll(".exam-options input").forEach((input) => {
+        input.addEventListener("change", function () {
+            const card = this.closest("[data-question-card]");
+            const index = Number(card.dataset.questionCard);
+            navButtons[index].classList.add("answered");
+        });
+    });
+
+    showQuestion(0);
+</script>
+{% endblock %}

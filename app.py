@@ -12,11 +12,13 @@ from services.storage_service import upload_document_to_storage, delete_document
     create_signed_document_url
 from services.document_loader import extract_text
 from services.chunker import split_text_into_chunks
+from services.cbt_generator import distribute_questions, generate_question_bank_batch, get_random_bank_questions, \
+    count_question_bank_for_document
 
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from werkzeug.utils import secure_filename
 from config import Config
-from models import db, Document, DocumentChunk, ChatSession, ChatMessage, CBTSession, CBTQuestion
+from models import db, Document, DocumentChunk, ChatSession, ChatMessage, CBTSession, CBTQuestion, CBTQuestionBank
 from datetime import datetime, timedelta
 from sqlalchemy import text
 
@@ -998,6 +1000,13 @@ def health_check():
 def cbt():
     documents = Document.query.order_by(Document.created_at.desc()).all()
 
+    document_question_counts = {}
+
+    for document in documents:
+        document_question_counts[document.id] = CBTQuestionBank.query.filter_by(
+            document_id=document.id
+        ).count()
+
     recent_sessions = (
         CBTSession.query
         .filter(CBTSession.score.isnot(None))
@@ -1027,13 +1036,45 @@ def cbt():
         if question_count not in [10, 20, 30]:
             question_count = 10
 
-        selected_titles = []
+        selected_document_objects = []
 
         for document_id in selected_documents:
             document = Document.query.get(int(document_id))
 
             if document:
-                selected_titles.append(document.title)
+                selected_document_objects.append(document)
+
+        if not selected_document_objects:
+            flash("No valid documents selected.", "error")
+            return redirect(url_for("cbt"))
+
+        # Check whether selected documents have enough saved CBT questions.
+        distribution = distribute_questions(
+            total_questions=question_count,
+            document_ids=selected_documents
+        )
+
+        insufficient_documents = []
+
+        for document in selected_document_objects:
+            questions_needed = distribution.get(document.id, 0)
+            available_questions = document_question_counts.get(document.id, 0)
+
+            if available_questions < questions_needed:
+                insufficient_documents.append(
+                    f"{document.title} needs {questions_needed} questions but has only {available_questions}."
+                )
+
+        if insufficient_documents:
+            flash(
+                "Some selected documents do not have enough CBT questions yet. "
+                + " ".join(insufficient_documents)
+                + " Admin should generate more questions first.",
+                "error"
+            )
+            return redirect(url_for("cbt"))
+
+        selected_titles = [document.title for document in selected_document_objects]
 
         session_title = " + ".join(selected_titles[:2])
 
@@ -1044,19 +1085,191 @@ def cbt():
             title=session_title,
             selected_document_ids=",".join(selected_documents),
             total_questions=question_count,
-            status="created"
+            status="in_progress"
         )
 
         db.session.add(cbt_session)
+        db.session.flush()
+
+        total_selected_questions = 0
+
+        for document in selected_document_objects:
+            questions_needed = distribution.get(document.id, 0)
+
+            if questions_needed <= 0:
+                continue
+
+            bank_questions = get_random_bank_questions(
+                document_id=document.id,
+                question_count=questions_needed
+            )
+
+            for bank_question in bank_questions:
+                exam_question = CBTQuestion(
+                    session_id=cbt_session.id,
+                    question_text=bank_question.question_text,
+                    option_a=bank_question.option_a,
+                    option_b=bank_question.option_b,
+                    option_c=bank_question.option_c,
+                    option_d=bank_question.option_d,
+                    correct_answer=bank_question.correct_answer,
+                    explanation=bank_question.explanation,
+                    source_document_id=bank_question.document_id,
+                    source_chunk_id=bank_question.source_chunk_id
+                )
+
+                db.session.add(exam_question)
+                total_selected_questions += 1
+
+        if total_selected_questions == 0:
+            cbt_session.status = "failed"
+            db.session.commit()
+
+            flash("No questions could be selected from the question bank.", "error")
+            return redirect(url_for("cbt"))
+
+        cbt_session.total_questions = total_selected_questions
         db.session.commit()
 
-        flash("CBT session created. Question generation will be added next.", "success")
-        return redirect(url_for("cbt"))
+        flash(f"CBT exam started with {total_selected_questions} questions.", "success")
+        return redirect(url_for("take_cbt", session_id=cbt_session.id))
 
     return render_template(
         "cbt.html",
         documents=documents,
-        recent_sessions=recent_sessions
+        recent_sessions=recent_sessions,
+        document_question_counts=document_question_counts
+    )
+
+
+@app.route("/cbt/<int:session_id>")
+def take_cbt(session_id):
+    cbt_session = CBTSession.query.get_or_404(session_id)
+
+    questions = (
+        CBTQuestion.query
+        .filter_by(session_id=cbt_session.id)
+        .order_by(CBTQuestion.id.asc())
+        .all()
+    )
+
+    return render_template(
+        "take_cbt.html",
+        cbt_session=cbt_session,
+        questions=questions
+    )
+
+
+@app.route("/cbt/generate-bank/<int:document_id>", methods=["POST"])
+@admin_required
+def generate_cbt_bank(document_id):
+    document = Document.query.get_or_404(document_id)
+
+    target_count = 50
+    current_count = CBTQuestionBank.query.filter_by(document_id=document.id).count()
+    missing_count = max(target_count - current_count, 0)
+
+    if missing_count == 0:
+        flash(f"{document.title} already has {target_count} CBT questions.", "success")
+        return redirect(url_for("cbt"))
+
+    batch_size = min(10, missing_count)
+
+    try:
+        generated_questions = generate_question_bank_batch(
+            document=document,
+            question_count=batch_size
+        )
+
+        saved_count = 0
+
+        for question in generated_questions:
+            cbt_bank_question = CBTQuestionBank(
+                document_id=document.id,
+                source_chunk_id=question.get("source_chunk_id"),
+                question_text=question["question_text"],
+                option_a=question["option_a"],
+                option_b=question["option_b"],
+                option_c=question["option_c"],
+                option_d=question["option_d"],
+                correct_answer=question["correct_answer"],
+                explanation=question["explanation"],
+                difficulty="standard"
+            )
+
+            db.session.add(cbt_bank_question)
+            saved_count += 1
+
+        db.session.commit()
+
+        flash(
+            f"Generated {saved_count} CBT questions for {document.title}. "
+            f"Current bank: {current_count + saved_count}/50.",
+            "success"
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Question bank generation failed: {str(e)}", "error")
+
+    return redirect(url_for("cbt"))
+
+
+@app.route("/cbt/<int:session_id>/submit", methods=["POST"])
+def submit_cbt(session_id):
+    cbt_session = CBTSession.query.get_or_404(session_id)
+
+    questions = (
+        CBTQuestion.query
+        .filter_by(session_id=cbt_session.id)
+        .order_by(CBTQuestion.id.asc())
+        .all()
+    )
+
+    if not questions:
+        flash("No questions found for this CBT session.", "error")
+        return redirect(url_for("cbt"))
+
+    score = 0
+
+    for question in questions:
+        user_answer = request.form.get(f"question_{question.id}")
+
+        if user_answer:
+            question.user_answer = user_answer.strip().upper()
+
+            if question.user_answer == question.correct_answer:
+                score += 1
+
+    total_questions = len(questions)
+    percentage = round((score / total_questions) * 100, 2)
+
+    cbt_session.score = score
+    cbt_session.percentage = percentage
+    cbt_session.status = "completed"
+    cbt_session.completed_at = datetime.utcnow()
+
+    db.session.commit()
+
+    flash(f"CBT submitted. You scored {score}/{total_questions}.", "success")
+    return redirect(url_for("cbt_result", session_id=cbt_session.id))
+
+
+@app.route("/cbt/<int:session_id>/result")
+def cbt_result(session_id):
+    cbt_session = CBTSession.query.get_or_404(session_id)
+
+    questions = (
+        CBTQuestion.query
+        .filter_by(session_id=cbt_session.id)
+        .order_by(CBTQuestion.id.asc())
+        .all()
+    )
+
+    return render_template(
+        "cbt_result.html",
+        cbt_session=cbt_session,
+        questions=questions
     )
 
 

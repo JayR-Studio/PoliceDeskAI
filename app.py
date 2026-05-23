@@ -882,6 +882,58 @@ def view_source(chunk_id):
         chunk=chunk
     )
 
+# --------------------------------------------------------------------------------------------------------------
+#                                    Read Document
+#---------------------------------------------------------------------------------------------------------------
+@app.route("/documents/<int:document_id>/read")
+@admin_required
+def read_document(document_id):
+    document = Document.query.get_or_404(document_id)
+
+    selected_chunk_id = request.args.get("chunk_id", type=int)
+
+    chunks = (
+        DocumentChunk.query
+        .filter_by(document_id=document.id)
+        .order_by(DocumentChunk.chunk_number.asc())
+        .all()
+    )
+
+    if not chunks:
+        selected_chunk = None
+    elif selected_chunk_id:
+        selected_chunk = (
+            DocumentChunk.query
+            .filter_by(id=selected_chunk_id, document_id=document.id)
+            .first()
+        )
+
+        if not selected_chunk:
+            selected_chunk = chunks[0]
+    else:
+        selected_chunk = chunks[0]
+
+    current_index = 0
+
+    if selected_chunk:
+        for index, chunk in enumerate(chunks):
+            if chunk.id == selected_chunk.id:
+                current_index = index
+                break
+
+    previous_chunk = chunks[current_index - 1] if selected_chunk and current_index > 0 else None
+    next_chunk = chunks[current_index + 1] if selected_chunk and current_index < len(chunks) - 1 else None
+
+    return render_template(
+        "document_reader.html",
+        document=document,
+        chunks=chunks,
+        selected_chunk=selected_chunk,
+        previous_chunk=previous_chunk,
+        next_chunk=next_chunk,
+        current_index=current_index
+    )
+
 
 @app.route("/health")
 def health_check():

@@ -3533,3 +3533,87 @@ html[data-theme="light"] .source-text-box {
         overflow-wrap: anywhere !important;
     }
 }
+
+/* ================================
+   CBT Score History + Recommendation
+   ================================ */
+
+.score-history-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.score-history-link:hover {
+    transform: translateY(-1px);
+    border-color: rgba(56, 189, 248, 0.45);
+}
+
+.score-history-item small {
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.recommendation-result-card {
+    border-color: rgba(16, 185, 129, 0.25);
+}
+
+.recommendation-list {
+    display: grid;
+    gap: 10px;
+}
+
+.recommendation-item {
+    background: rgba(16, 185, 129, 0.10);
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    color: var(--text);
+    border-radius: 14px;
+    padding: 12px;
+    line-height: 1.6;
+    font-weight: 650;
+}
+
+.ai-recommendation-box p {
+    margin: 0 0 10px;
+}
+
+.ai-recommendation-box p:last-child {
+    margin-bottom: 0;
+}
+
+@media (max-width: 700px) {
+    .recommendation-item {
+        padding: 10px;
+        border-radius: 12px;
+        font-size: 12.5px;
+        line-height: 1.5;
+    }
+
+    .score-history-item small {
+        font-size: 11.5px;
+    }
+}
+
+.recommendation-preview {
+    margin: 10px 0;
+    padding: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.answer-source-note {
+    margin-top: 10px;
+    padding: 9px 10px;
+    border-radius: 10px;
+    background: rgba(37, 99, 235, 0.08);
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    color: var(--muted);
+    font-size: 12px;
+}

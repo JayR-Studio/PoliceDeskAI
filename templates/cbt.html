@@ -24,17 +24,17 @@
             <form method="POST" class="cbt-form" id="cbtForm">
                 <div class="cbt-document-list">
                     {% if documents %}
-                        {% for document in documents %}
-                            <div class="cbt-document-bank-row">
-                                <label class="cbt-document-option">
-                                    <input
-                                        type="checkbox"
-                                        name="document_ids"
-                                        value="{{ document.id }}"
-                                        class="cbt-document-checkbox"
-                                    >
+                    {% for document in documents %}
+                    <div class="cbt-document-bank-row">
+                        <label class="cbt-document-option">
+                            <input
+                                    type="checkbox"
+                                    name="document_ids"
+                                    value="{{ document.id }}"
+                                    class="cbt-document-checkbox"
+                            >
 
-                                    <span>
+                            <span>
                                         <strong>{{ document.title }}</strong>
                                         <small>
                                             {{ document.category or "Uncategorized" }}
@@ -42,23 +42,23 @@
                                             • {{ document_question_counts.get(document.id, 0) }}/50 CBT questions
                                         </small>
                                     </span>
-                                </label>
+                        </label>
 
-                                {% if session.get("is_admin") %}
-                                    <button
-                                        type="submit"
-                                        form="generate-bank-form-{{ document.id }}"
-                                        class="secondary-btn cbt-generate-btn"
-                                    >
-                                        Generate Questions
-                                    </button>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
+                        {% if session.get("is_admin") %}
+                        <button
+                                type="submit"
+                                form="generate-bank-form-{{ document.id }}"
+                                class="secondary-btn cbt-generate-btn"
+                        >
+                            Generate Questions
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
                     {% else %}
-                        <p class="empty-documents-text">
-                            No documents available yet.
-                        </p>
+                    <p class="empty-documents-text">
+                        No documents available yet.
+                    </p>
                     {% endif %}
                 </div>
 
@@ -81,14 +81,14 @@
             </form>
 
             {% if session.get("is_admin") %}
-                {% for document in documents %}
-                    <form
-                        id="generate-bank-form-{{ document.id }}"
-                        method="POST"
-                        action="{{ url_for('generate_cbt_bank', document_id=document.id) }}"
-                        class="hidden-generate-form"
-                    ></form>
-                {% endfor %}
+            {% for document in documents %}
+            <form
+                    id="generate-bank-form-{{ document.id }}"
+                    method="POST"
+                    action="{{ url_for('generate_cbt_bank', document_id=document.id) }}"
+                    class="hidden-generate-form"
+            ></form>
+            {% endfor %}
             {% endif %}
         </section>
 
@@ -100,21 +100,27 @@
                 </div>
 
                 {% if recent_sessions %}
-                    <div class="score-history-list">
-                        {% for session in recent_sessions %}
-                            <div class="score-history-item">
-                                <strong>{{ session.title or "CBT Session" }}</strong>
-                                <p>
-                                    Score: {{ session.score }}/{{ session.total_questions }}
-                                    • {{ "%.1f"|format(session.percentage or 0) }}%
-                                </p>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="empty-mini-state">
-                        <p>No CBT attempts yet.</p>
-                    </div>
+                <div class="score-history-list">
+                    {% for session in recent_sessions %}
+                    <a
+                            href="{{ url_for('cbt_result', session_id=session.id) }}"
+                            class="score-history-item score-history-link"
+                    >
+                        <strong>{{ session.title or "CBT Session" }}</strong>
+
+                        <p>
+                            Score: {{ session.score }}/{{ session.total_questions }}
+                            • {{ "%.1f"|format(session.percentage or 0) }}%
+                        </p>
+
+                        {% if session.completed_at %}
+                        <small>
+                            Completed: {{ session.completed_at.strftime("%d %b %Y, %I:%M %p") }}
+                        </small>
+                        {% endif %}
+                    </a>
+                    {% endfor %}
+                </div>
                 {% endif %}
             </section>
 
@@ -125,9 +131,17 @@
                 </div>
 
                 <div class="ai-recommendation-box">
+                    {% if latest_completed_session and latest_completed_session.recommendation %}
+                        {% for line in latest_completed_session.recommendation.split('\n') %}
+                            {% if line.strip() %}
+                                <p>{{ line }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
                     <p>
-                        Complete your first CBT test to receive AI-guided study suggestions.
+                        Complete your first CBT test to receive study suggestions.
                     </p>
+                    {% endif %}
                 </div>
             </section>
         </aside>

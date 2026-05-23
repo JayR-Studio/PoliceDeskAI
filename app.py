@@ -1015,6 +1015,13 @@ def cbt():
         .all()
     )
 
+    latest_completed_session = (
+        CBTSession.query
+        .filter(CBTSession.score.isnot(None))
+        .order_by(CBTSession.completed_at.desc())
+        .first()
+    )
+
     if request.method == "POST":
         selected_documents = request.form.getlist("document_ids")
 
@@ -1138,7 +1145,8 @@ def cbt():
         "cbt.html",
         documents=documents,
         recent_sessions=recent_sessions,
-        document_question_counts=document_question_counts
+        document_question_counts=document_question_counts,
+        latest_completed_session=latest_completed_session
     )
 
 
@@ -1266,12 +1274,93 @@ def cbt_result(session_id):
         .all()
     )
 
+    wrong_questions = [
+        question for question in questions
+        if question.user_answer != question.correct_answer
+    ]
+
+    weak_sources = {}
+
+    for question in wrong_questions:
+        if not question.source_chunk_id:
+            continue
+
+        chunk = DocumentChunk.query.get(question.source_chunk_id)
+
+        if not chunk:
+            continue
+
+        document = Document.query.get(chunk.document_id)
+
+        if not document:
+            continue
+
+        source_key = f"{document.id}-{chunk.id}"
+
+        if source_key not in weak_sources:
+            page_label = "Page not available"
+
+            if chunk.page_start:
+                page_label = f"Page {chunk.page_start}"
+
+                if chunk.page_end and chunk.page_end != chunk.page_start:
+                    page_label += f"–{chunk.page_end}"
+
+            weak_sources[source_key] = {
+                "document": document,
+                "chunk": chunk,
+                "page_label": page_label,
+                "wrong_count": 0,
+                "questions": []
+            }
+
+        weak_sources[source_key]["wrong_count"] += 1
+        weak_sources[source_key]["questions"].append(question)
+
+    recommendation_items = []
+
+    if weak_sources:
+        sorted_sources = sorted(
+            weak_sources.values(),
+            key=lambda item: item["wrong_count"],
+            reverse=True
+        )
+
+        for item in sorted_sources:
+            document = item["document"]
+            chunk = item["chunk"]
+
+            recommendation_items.append({
+                "document_title": document.title,
+                "document_id": document.id,
+                "chunk_number": chunk.chunk_number,
+                "page_label": item["page_label"],
+                "wrong_count": item["wrong_count"],
+                "preview": chunk.chunk_text[:260] + "..." if len(chunk.chunk_text) > 260 else chunk.chunk_text
+            })
+
+        recommendation_text = "\n".join(
+            [
+                f"Review {item['document_title']}, {item['page_label']} "
+                f"(Section {item['chunk_number']}). You missed {item['wrong_count']} question(s) from this area."
+                for item in recommendation_items
+            ]
+        )
+    elif wrong_questions:
+        recommendation_text = "Review the selected documents again before retaking the CBT."
+    else:
+        recommendation_text = "Excellent performance. You answered all questions correctly."
+
+    cbt_session.recommendation = recommendation_text
+    db.session.commit()
+
     return render_template(
         "cbt_result.html",
         cbt_session=cbt_session,
-        questions=questions
+        questions=questions,
+        recommendation_items=recommendation_items,
+        weak_sources=weak_sources
     )
-
 
 @app.route("/summaries")
 def summaries():

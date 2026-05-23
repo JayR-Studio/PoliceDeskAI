@@ -19,6 +19,45 @@
         <a href="{{ url_for('cbt') }}" class="primary-btn">Back to CBT</a>
     </div>
 
+    <div class="cbt-card recommendation-result-card">
+        <div class="cbt-card-header">
+            <h4>Study Recommendation</h4>
+            <p>Specific sections to revise based on the questions you missed.</p>
+        </div>
+
+        {% if recommendation_items %}
+        <div class="recommendation-list">
+            {% for item in recommendation_items %}
+            <div class="recommendation-item">
+                <strong>{{ item.document_title }}</strong>
+                <p>
+                    {{ item.page_label }} • Section {{ item.chunk_number }}
+                </p>
+                <p>
+                    You missed {{ item.wrong_count }} question(s) from this area.
+                </p>
+
+                <div class="recommendation-preview">
+                    {{ item.preview }}
+                </div>
+
+                <a
+                        href="{{ url_for('view_original_document', document_id=item.document_id) }}"
+                        class="small-action-btn primary-action"
+                        target="_blank"
+                >
+                    Open Document
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="recommendation-item">
+            Excellent performance. You answered all questions correctly.
+        </div>
+        {% endif %}
+    </div>
+
     <div class="cbt-card">
         <div class="cbt-card-header">
             <h4>Answer Review</h4>
@@ -27,27 +66,33 @@
 
         <div class="generated-question-list">
             {% for question in questions %}
-                {% set is_correct = question.user_answer == question.correct_answer %}
+            {% set is_correct = question.user_answer == question.correct_answer %}
 
-                <article class="generated-question-card {% if is_correct %}correct-review{% else %}wrong-review{% endif %}">
-                    <h4>Question {{ loop.index }}</h4>
-                    <p>{{ question.question_text }}</p>
+            <article class="generated-question-card {% if is_correct %}correct-review{% else %}wrong-review{% endif %}">
+                <h4>Question {{ loop.index }}</h4>
+                <p>{{ question.question_text }}</p>
 
-                    <ul>
-                        <li><strong>A.</strong> {{ question.option_a }}</li>
-                        <li><strong>B.</strong> {{ question.option_b }}</li>
-                        <li><strong>C.</strong> {{ question.option_c }}</li>
-                        <li><strong>D.</strong> {{ question.option_d }}</li>
-                    </ul>
+                <ul>
+                    <li><strong>A.</strong> {{ question.option_a }}</li>
+                    <li><strong>B.</strong> {{ question.option_b }}</li>
+                    <li><strong>C.</strong> {{ question.option_c }}</li>
+                    <li><strong>D.</strong> {{ question.option_d }}</li>
+                </ul>
 
-                    <div class="answer-preview">
-                        <strong>Your Answer:</strong> {{ question.user_answer or "Not answered" }}
-                        <br>
-                        <strong>Correct Answer:</strong> {{ question.correct_answer }}
-                        <br>
-                        <strong>Explanation:</strong> {{ question.explanation }}
-                    </div>
-                </article>
+                <div class="answer-preview">
+                    <strong>Your Answer:</strong> {{ question.user_answer or "Not answered" }}
+                    <br>
+                    <strong>Correct Answer:</strong> {{ question.correct_answer }}
+                    <br>
+                    <strong>Explanation:</strong> {{ question.explanation }}
+                </div>
+                {% if question.source_chunk_id %}
+                {% set chunk = question.source_chunk_id %}
+                <div class="answer-source-note">
+                    Source reference available from section ID: {{ question.source_chunk_id }}
+                </div>
+                {% endif %}
+            </article>
             {% endfor %}
         </div>
     </div>

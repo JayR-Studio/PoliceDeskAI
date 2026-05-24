@@ -1067,7 +1067,12 @@ def cbt():
             questions_needed = distribution.get(document.id, 0)
             available_questions = document_question_counts.get(document.id, 0)
 
-            if available_questions < questions_needed:
+            if available_questions < 10:
+                insufficient_documents.append(
+                    f"{document.title} is not CBT-ready yet. It has only {available_questions} question(s)."
+                )
+
+            elif available_questions < questions_needed:
                 insufficient_documents.append(
                     f"{document.title} needs {questions_needed} questions but has only {available_questions}."
                 )

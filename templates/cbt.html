@@ -31,22 +31,33 @@
                     {% if documents %}
                     {% for document in documents %}
                     <div class="cbt-document-bank-row">
-                        <label class="cbt-document-option">
+                        {% set question_count = document_question_counts.get(document.id, 0) %}
+                        {% set is_cbt_ready = question_count >= 10 %}
+
+                        <label class="cbt-document-option {% if not is_cbt_ready %}cbt-document-not-ready{% endif %}">
                             <input
-                                    type="checkbox"
-                                    name="document_ids"
-                                    value="{{ document.id }}"
-                                    class="cbt-document-checkbox"
+                                type="checkbox"
+                                name="document_ids"
+                                value="{{ document.id }}"
+                                class="cbt-document-checkbox"
+                                {% if not is_cbt_ready %}disabled{% endif %}
                             >
 
                             <span>
-                                        <strong>{{ document.title }}</strong>
-                                        <small>
-                                            {{ document.category or "Uncategorized" }}
-                                            • {{ document.total_chunks }} sections
-                                            • {{ document_question_counts.get(document.id, 0) }}/50 CBT questions
-                                        </small>
-                                    </span>
+                                <strong>{{ document.title }}</strong>
+
+                                <small>
+                                    {{ document.category or "Uncategorized" }}
+                                    • {{ document.total_chunks }} sections
+                                    • {{ question_count }}/50 CBT questions
+                                </small>
+
+                                {% if is_cbt_ready %}
+                                    <em class="cbt-ready-pill">Ready for CBT</em>
+                                {% else %}
+                                    <em class="cbt-not-ready-pill">Needs at least 10 questions</em>
+                                {% endif %}
+                            </span>
                         </label>
 
                         {% if session.get("is_admin") %}
@@ -154,7 +165,7 @@
 </section>
 
 <script>
-    const checkboxes = document.querySelectorAll(".cbt-document-checkbox");
+    const checkboxes = document.querySelectorAll(".cbt-document-checkbox:not(:disabled)");
     const selectedCountText = document.getElementById("selectedCountText");
     const startCbtBtn = document.getElementById("startCbtBtn");
 

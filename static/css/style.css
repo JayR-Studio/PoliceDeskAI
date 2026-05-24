@@ -3952,3 +3952,55 @@ html[data-theme="light"] .source-text-box {
         border-radius: 11px;
     }
 }
+
+/* ================================
+   CBT Document Readiness State
+   ================================ */
+
+.cbt-document-not-ready {
+    opacity: 0.62;
+    cursor: not-allowed;
+}
+
+.cbt-document-not-ready:hover {
+    transform: none;
+    border-color: var(--border);
+    background: var(--card-soft);
+}
+
+.cbt-document-not-ready input {
+    cursor: not-allowed;
+}
+
+.cbt-ready-pill,
+.cbt-not-ready-pill {
+    display: inline-flex;
+    width: fit-content;
+    margin-top: 4px;
+    padding: 5px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 850;
+    line-height: 1;
+}
+
+.cbt-ready-pill {
+    color: var(--success);
+    background: var(--success-bg);
+    border: 1px solid rgba(16, 185, 129, 0.22);
+}
+
+.cbt-not-ready-pill {
+    color: var(--warning);
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+@media (max-width: 700px) {
+    .cbt-ready-pill,
+    .cbt-not-ready-pill {
+        font-size: 10.5px;
+        padding: 5px 7px;
+    }
+}

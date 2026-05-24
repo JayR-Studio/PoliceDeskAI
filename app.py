@@ -1388,12 +1388,44 @@ def cbt_question_bank():
             document_id=document.id
         ).count()
 
+    question_sources = {}
+
+    for question in questions:
+        source_info = {
+            "document_title": "Unknown document",
+            "page_label": "Page not available",
+            "chunk_number": "Not available"
+        }
+
+        if question.document_id:
+            document = Document.query.get(question.document_id)
+
+            if document:
+                source_info["document_title"] = document.title
+
+        if question.source_chunk_id:
+            chunk = DocumentChunk.query.get(question.source_chunk_id)
+
+            if chunk:
+                source_info["chunk_number"] = chunk.chunk_number
+
+                if chunk.page_start:
+                    page_label = f"Page {chunk.page_start}"
+
+                    if chunk.page_end and chunk.page_end != chunk.page_start:
+                        page_label += f"–{chunk.page_end}"
+
+                    source_info["page_label"] = page_label
+
+        question_sources[question.id] = source_info
+
     return render_template(
         "cbt_question_bank.html",
         documents=documents,
         questions=questions,
         selected_document_id=selected_document_id,
-        document_question_counts=document_question_counts
+        document_question_counts=document_question_counts,
+        question_sources=question_sources
     )
 
 

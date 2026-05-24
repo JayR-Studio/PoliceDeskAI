@@ -38,7 +38,7 @@
                     <option value="">All documents</option>
 
                     {% for document in documents %}
-                        <option 
+                        <option
                             value="{{ document.id }}"
                             {% if selected_document_id == document.id %}selected{% endif %}
                         >
@@ -65,8 +65,8 @@
                                     <h4>{{ question.question_text }}</h4>
                                 </div>
 
-                                <form 
-                                    method="POST" 
+                                <form
+                                    method="POST"
                                     action="{{ url_for('delete_cbt_bank_question', question_id=question.id) }}"
                                     onsubmit="return confirm('Delete this CBT question permanently?');"
                                 >
@@ -100,15 +100,34 @@
                                 <strong>Explanation:</strong> {{ question.explanation or "No explanation provided." }}
                             </div>
 
-                            <div class="question-bank-meta">
-                                <span>Document ID: {{ question.document_id }}</span>
+                            {% set source = question_sources.get(question.id) %}
 
-                                {% if question.source_chunk_id %}
-                                    <span>Source Section ID: {{ question.source_chunk_id }}</span>
-                                {% endif %}
+                            <div class="question-bank-meta improved-source-meta">
+                                <span>
+                                    Source: {{ source.document_title if source else "Unknown document" }}
+                                </span>
 
-                                <span>Difficulty: {{ question.difficulty or "standard" }}</span>
+                                <span>
+                                    {{ source.page_label if source else "Page not available" }}
+                                </span>
+
+                                <span>
+                                    Section {{ source.chunk_number if source else "Not available" }}
+                                </span>
+
+                                <span>
+                                    Difficulty: {{ question.difficulty or "standard" }}
+                                </span>
                             </div>
+                            {% if question.source_chunk_id %}
+                                <a
+                                    href="{{ url_for('view_chunk_source', chunk_id=question.source_chunk_id) }}"
+                                    class="small-action-btn secondary-action question-source-btn"
+                                    target="_blank"
+                                >
+                                    View Source Section
+                                </a>
+                            {% endif %}
                         </article>
                     {% endfor %}
                 </div>
@@ -134,8 +153,8 @@
                                 {{ document_question_counts.get(document.id, 0) }}/50 questions
                             </p>
 
-                            <form 
-                                method="POST" 
+                            <form
+                                method="POST"
                                 action="{{ url_for('generate_cbt_bank', document_id=document.id) }}"
                                 class="inline-form"
                             >

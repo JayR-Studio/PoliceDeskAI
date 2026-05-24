@@ -12,6 +12,11 @@
                 Select official documents and generate practice questions to test your understanding.
             </p>
         </div>
+        {% if session.get("is_admin") %}
+        <a href="{{ url_for('cbt_question_bank') }}" class="secondary-btn">
+            Manage Question Bank
+        </a>
+        {% endif %}
     </div>
 
     <div class="cbt-layout">
@@ -132,11 +137,11 @@
 
                 <div class="ai-recommendation-box">
                     {% if latest_completed_session and latest_completed_session.recommendation %}
-                        {% for line in latest_completed_session.recommendation.split('\n') %}
-                            {% if line.strip() %}
-                                <p>{{ line }}</p>
-                            {% endif %}
-                        {% endfor %}
+                    {% for line in latest_completed_session.recommendation.split('\n') %}
+                    {% if line.strip() %}
+                    <p>{{ line }}</p>
+                    {% endif %}
+                    {% endfor %}
                     {% else %}
                     <p>
                         Complete your first CBT test to receive study suggestions.

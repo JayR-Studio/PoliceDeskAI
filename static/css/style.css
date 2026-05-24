@@ -3617,3 +3617,250 @@ html[data-theme="light"] .source-text-box {
     color: var(--muted);
     font-size: 12px;
 }
+
+/* ================================
+   CBT Question Bank Management
+   ================================ */
+
+.question-bank-filter {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 18px;
+}
+
+.question-bank-filter label {
+    grid-column: 1 / -1;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.question-bank-filter select {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--card-soft);
+    color: var(--text);
+    border-radius: 14px;
+    padding: 13px;
+    font-weight: 700;
+}
+
+.question-bank-list {
+    display: grid;
+    gap: 14px;
+}
+
+.question-bank-card {
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px;
+    overflow-wrap: break-word;
+}
+
+.question-bank-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.question-bank-label {
+    display: inline-flex;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.question-bank-card h4 {
+    margin: 0;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.question-bank-options {
+    display: grid;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.question-bank-options p {
+    margin: 0;
+    padding: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.correct-bank-option {
+    border-color: rgba(16, 185, 129, 0.35) !important;
+    background: rgba(16, 185, 129, 0.10) !important;
+}
+
+.question-bank-explanation {
+    margin-top: 12px;
+    background: rgba(37, 99, 235, 0.08);
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 10px;
+    line-height: 1.6;
+    font-size: 13px;
+}
+
+.question-bank-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.question-bank-meta span {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 6px 9px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+@media (max-width: 700px) {
+    .question-bank-filter {
+        grid-template-columns: 1fr;
+    }
+
+    .question-bank-filter .primary-btn {
+        width: 100%;
+    }
+
+    .question-bank-card {
+        padding: 12px;
+        border-radius: 15px;
+    }
+
+    .question-bank-top {
+        display: grid;
+        gap: 10px;
+    }
+
+    .question-bank-top form,
+    .question-bank-top .small-danger-btn {
+        width: 100%;
+    }
+
+    .question-bank-card h4 {
+        font-size: 13.5px;
+    }
+
+    .question-bank-options p {
+        padding: 9px;
+        font-size: 12.5px;
+    }
+
+    .question-bank-explanation {
+        font-size: 12.5px;
+    }
+}
+
+/* =====================================================
+   Global Mobile Overflow Protection
+   Prevent long document names/questions from breaking cards
+   ===================================================== */
+
+.card-safe-text,
+.cbt-card,
+.score-history-item,
+.question-bank-card,
+.cbt-document-option,
+.document-card,
+.generated-question-card,
+.exam-question-card,
+.recommendation-item,
+.ai-recommendation-box {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+.cbt-card *,
+.score-history-item *,
+.question-bank-card *,
+.cbt-document-option *,
+.document-card *,
+.generated-question-card *,
+.exam-question-card *,
+.recommendation-item *,
+.ai-recommendation-box * {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+/* Stronger wrapping only for titles/long labels */
+.cbt-document-option strong,
+.score-history-item strong,
+.question-bank-card h4,
+.document-card h4,
+.generated-question-card h4,
+.exam-question-card h4,
+.recommendation-item strong {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* Fix Question Count sidebar cards */
+.score-history-item {
+    display: grid;
+    gap: 8px;
+}
+
+.score-history-item strong {
+    display: block;
+    font-size: 14px;
+    line-height: 1.35;
+}
+
+.score-history-item p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.score-history-item form,
+.score-history-item .secondary-btn,
+.score-history-item .cbt-generate-btn {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Mobile-specific tightening */
+@media (max-width: 700px) {
+    .score-history-item {
+        padding: 10px;
+        border-radius: 13px;
+    }
+
+    .score-history-item strong {
+        font-size: 12.5px;
+        line-height: 1.3;
+    }
+
+    .score-history-item p {
+        font-size: 11.5px;
+    }
+
+    .score-history-item .secondary-btn,
+    .score-history-item .cbt-generate-btn {
+        padding: 8px 9px;
+        font-size: 11.5px;
+        border-radius: 10px;
+    }
+}

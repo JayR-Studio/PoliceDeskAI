@@ -1362,6 +1362,58 @@ def cbt_result(session_id):
         weak_sources=weak_sources
     )
 
+
+@app.route("/cbt/question-bank")
+@admin_required
+def cbt_question_bank():
+    selected_document_id = request.args.get("document_id", type=int)
+
+    documents = Document.query.order_by(Document.title.asc()).all()
+
+    query = CBTQuestionBank.query
+
+    if selected_document_id:
+        query = query.filter_by(document_id=selected_document_id)
+
+    questions = (
+        query
+        .order_by(CBTQuestionBank.created_at.desc())
+        .all()
+    )
+
+    document_question_counts = {}
+
+    for document in documents:
+        document_question_counts[document.id] = CBTQuestionBank.query.filter_by(
+            document_id=document.id
+        ).count()
+
+    return render_template(
+        "cbt_question_bank.html",
+        documents=documents,
+        questions=questions,
+        selected_document_id=selected_document_id,
+        document_question_counts=document_question_counts
+    )
+
+
+@app.route("/cbt/question-bank/<int:question_id>/delete", methods=["POST"])
+@admin_required
+def delete_cbt_bank_question(question_id):
+    question = CBTQuestionBank.query.get_or_404(question_id)
+
+    try:
+        db.session.delete(question)
+        db.session.commit()
+        flash("CBT question deleted successfully.", "success")
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Failed to delete CBT question: {str(e)}", "error")
+
+    return redirect(request.referrer or url_for("cbt_question_bank"))
+
+
 @app.route("/summaries")
 def summaries():
     return render_template("coming_soon.html", feature_name="Document Summaries")

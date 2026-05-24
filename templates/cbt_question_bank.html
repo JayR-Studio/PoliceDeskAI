@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block page_title %}CBT Question Bank{% endblock %}
+
+{% block content %}
+<section class="cbt-shell">
+    <div class="cbt-hero">
+        <div>
+            <p class="reader-eyebrow">Admin CBT Control</p>
+            <h3>Question Bank</h3>
+            <p>
+                Review, filter, and manage AI-generated CBT questions.
+            </p>
+        </div>
+
+        <a href="{{ url_for('cbt') }}" class="secondary-btn">
+            Back to CBT
+        </a>
+    </div>
+
+    <div class="cbt-layout">
+        <section class="cbt-card">
+            <div class="cbt-card-header">
+                <h4>Generated Questions</h4>
+                <p>
+                    {% if selected_document_id %}
+                        Showing questions for selected document.
+                    {% else %}
+                        Showing all generated CBT questions.
+                    {% endif %}
+                </p>
+            </div>
+
+            <form method="GET" action="{{ url_for('cbt_question_bank') }}" class="question-bank-filter">
+                <label for="document_id">Filter by document</label>
+
+                <select name="document_id" id="document_id">
+                    <option value="">All documents</option>
+
+                    {% for document in documents %}
+                        <option 
+                            value="{{ document.id }}"
+                            {% if selected_document_id == document.id %}selected{% endif %}
+                        >
+                            {{ document.title }} — {{ document_question_counts.get(document.id, 0) }} questions
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="primary-btn">
+                    Apply Filter
+                </button>
+            </form>
+
+            {% if questions %}
+                <div class="question-bank-list">
+                    {% for question in questions %}
+                        <article class="question-bank-card">
+                            <div class="question-bank-top">
+                                <div>
+                                    <span class="question-bank-label">
+                                        Question {{ loop.index }}
+                                    </span>
+
+                                    <h4>{{ question.question_text }}</h4>
+                                </div>
+
+                                <form 
+                                    method="POST" 
+                                    action="{{ url_for('delete_cbt_bank_question', question_id=question.id) }}"
+                                    onsubmit="return confirm('Delete this CBT question permanently?');"
+                                >
+                                    <button type="submit" class="small-danger-btn">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="question-bank-options">
+                                <p class="{% if question.correct_answer == 'A' %}correct-bank-option{% endif %}">
+                                    <strong>A.</strong> {{ question.option_a }}
+                                </p>
+
+                                <p class="{% if question.correct_answer == 'B' %}correct-bank-option{% endif %}">
+                                    <strong>B.</strong> {{ question.option_b }}
+                                </p>
+
+                                <p class="{% if question.correct_answer == 'C' %}correct-bank-option{% endif %}">
+                                    <strong>C.</strong> {{ question.option_c }}
+                                </p>
+
+                                <p class="{% if question.correct_answer == 'D' %}correct-bank-option{% endif %}">
+                                    <strong>D.</strong> {{ question.option_d }}
+                                </p>
+                            </div>
+
+                            <div class="question-bank-explanation">
+                                <strong>Correct Answer:</strong> {{ question.correct_answer }}
+                                <br>
+                                <strong>Explanation:</strong> {{ question.explanation or "No explanation provided." }}
+                            </div>
+
+                            <div class="question-bank-meta">
+                                <span>Document ID: {{ question.document_id }}</span>
+
+                                {% if question.source_chunk_id %}
+                                    <span>Source Section ID: {{ question.source_chunk_id }}</span>
+                                {% endif %}
+
+                                <span>Difficulty: {{ question.difficulty or "standard" }}</span>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-mini-state">
+                    <p>No CBT questions found for this filter.</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <aside class="cbt-side-panel">
+            <section class="cbt-card">
+                <div class="cbt-card-header">
+                    <h4>Question Count</h4>
+                    <p>Each document should ideally reach 50 questions.</p>
+                </div>
+
+                <div class="score-history-list">
+                    {% for document in documents %}
+                        <div class="score-history-item">
+                            <strong>{{ document.title }}</strong>
+                            <p>
+                                {{ document_question_counts.get(document.id, 0) }}/50 questions
+                            </p>
+
+                            <form 
+                                method="POST" 
+                                action="{{ url_for('generate_cbt_bank', document_id=document.id) }}"
+                                class="inline-form"
+                            >
+                                <button type="submit" class="secondary-btn cbt-generate-btn">
+                                    Generate More
+                                </button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </aside>
+    </div>
+</section>
+{% endblock %}

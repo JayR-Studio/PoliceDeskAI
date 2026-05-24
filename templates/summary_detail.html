@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block page_title %}Summary Detail{% endblock %}
+
+{% block content %}
+<section class="summary-shell">
+    <div class="summary-hero">
+        <div>
+            <p class="reader-eyebrow">Generated Summary</p>
+            <h3>{{ summary.title }}</h3>
+            <p>
+                {{ summary.document.title if summary.document else "Unknown document" }}
+                • {{ summary.status|title }}
+            </p>
+        </div>
+
+        <a href="{{ url_for('summaries') }}" class="secondary-btn">
+            Back to Summaries
+        </a>
+    </div>
+
+    <section class="summary-card">
+        <div class="summary-card-header">
+            <h4>Study Summary</h4>
+            <p>AI-generated summary from the selected document.</p>
+        </div>
+
+        {% if summary.summary_text %}
+        <div class="summary-output">
+            {{
+            summary.summary_text
+            | replace('**', '')
+            | replace('###', '')
+            | replace('##', '')
+            | replace('#', '')
+            | replace('\n', '<br>')
+            | safe
+            }}
+        </div>
+        {% else %}
+        <div class="empty-mini-state">
+            <p>No summary text available.</p>
+        </div>
+        {% endif %}
+    </section>
+</section>
+{% endblock %}

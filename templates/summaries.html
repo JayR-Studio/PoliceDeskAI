@@ -54,7 +54,7 @@
                 {% if recent_summaries %}
                     <div class="summary-history-list">
                         {% for summary in recent_summaries %}
-                            <div class="summary-history-item">
+                            <a href="{{ url_for('view_summary', summary_id=summary.id) }}" class="summary-history-item summary-history-link">
                                 <strong>{{ summary.title }}</strong>
 
                                 <p>
@@ -64,7 +64,7 @@
                                 <span class="summary-status-pill status-{{ summary.status }}">
                                     {{ summary.status|title }}
                                 </span>
-                            </div>
+                            </a>
                         {% endfor %}
                     </div>
                 {% else %}

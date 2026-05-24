@@ -4235,3 +4235,69 @@ html[data-theme="light"] .source-text-box {
         font-size: 11.5px;
     }
 }
+
+/* ================================
+   Summary Detail
+   ================================ */
+
+.summary-history-link {
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.summary-history-link:hover {
+    transform: translateY(-1px);
+    border-color: rgba(56, 189, 248, 0.45);
+}
+
+.summary-output {
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+    color: var(--text);
+    line-height: 1.85;
+    font-size: 15px;
+    overflow-wrap: break-word;
+}
+
+.summary-output strong,
+.summary-output b {
+    color: var(--text);
+}
+
+@media (max-width: 700px) {
+    .summary-output {
+        padding: 12px;
+        border-radius: 14px;
+        font-size: 13px;
+        line-height: 1.65;
+    }
+
+    .summary-history-link {
+        display: grid;
+    }
+}
+
+/* ================================
+   Summary Output Polish
+   ================================ */
+
+.summary-output {
+    font-size: 15px;
+    line-height: 1.9;
+}
+
+.summary-output br {
+    display: block;
+    content: "";
+    margin-bottom: 6px;
+}
+
+@media (max-width: 700px) {
+    .summary-output {
+        font-size: 13px;
+        line-height: 1.7;
+    }
+}

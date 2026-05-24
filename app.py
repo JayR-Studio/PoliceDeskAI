@@ -12,6 +12,7 @@ from services.storage_service import upload_document_to_storage, delete_document
     create_signed_document_url
 from services.document_loader import extract_text
 from services.chunker import split_text_into_chunks
+from services.summary_generator import generate_document_summary
 from services.cbt_generator import distribute_questions, generate_question_bank_batch, get_random_bank_questions, \
     count_question_bank_for_document
 
@@ -1550,19 +1551,47 @@ def summaries():
             document_id=document.id,
             title=f"Summary of {document.title}",
             summary_type="full_document",
-            status="created"
+            status="generating"
         )
 
         db.session.add(saved_summary)
         db.session.commit()
 
-        flash("Summary request created. AI summary generation will be added next.", "success")
-        return redirect(url_for("summaries"))
+        try:
+            summary_text = generate_document_summary(document)
+
+            saved_summary.summary_text = summary_text
+            saved_summary.status = "ready"
+
+            db.session.commit()
+
+            flash("Summary generated successfully.", "success")
+            return redirect(url_for("view_summary", summary_id=saved_summary.id))
+
+        except Exception as e:
+            db.session.rollback()
+
+            saved_summary.status = "failed"
+            db.session.add(saved_summary)
+            db.session.commit()
+
+            flash(f"Summary generation failed: {str(e)}", "error")
+            return redirect(url_for("summaries"))
 
     return render_template(
         "summaries.html",
         documents=documents,
         recent_summaries=recent_summaries
+    )
+
+
+@app.route("/summaries/<int:summary_id>")
+def view_summary(summary_id):
+    summary = SavedSummary.query.get_or_404(summary_id)
+
+    return render_template(
+        "summary_detail.html",
+        summary=summary
     )
 
 

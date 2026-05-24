@@ -17,6 +17,28 @@
         <a href="{{ url_for('summaries') }}" class="secondary-btn">
             Back to Summaries
         </a>
+
+        {% if summary.document %}
+        <a
+                href="{{ url_for('view_original_document', document_id=summary.document.id) }}"
+                class="primary-btn"
+                target="_blank"
+        >
+            Open Document
+        </a>
+        {% endif %}
+
+        {% if session.get("is_admin") %}
+        <form
+                method="POST"
+                action="{{ url_for('delete_summary', summary_id=summary.id) }}"
+                onsubmit="return confirm('Delete this summary permanently?');"
+        >
+            <button type="submit" class="small-danger-btn">
+                Delete Summary
+            </button>
+        </form>
+        {% endif %}
     </div>
 
     <section class="summary-card">

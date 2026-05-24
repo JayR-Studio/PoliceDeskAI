@@ -1595,5 +1595,22 @@ def view_summary(summary_id):
     )
 
 
+@app.route("/summaries/<int:summary_id>/delete", methods=["POST"])
+@admin_required
+def delete_summary(summary_id):
+    summary = SavedSummary.query.get_or_404(summary_id)
+
+    try:
+        db.session.delete(summary)
+        db.session.commit()
+        flash("Summary deleted successfully.", "success")
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Failed to delete summary: {str(e)}", "error")
+
+    return redirect(url_for("summaries"))
+
+
 if __name__ == "__main__":
     app.run(debug=app.config["DEBUG"])

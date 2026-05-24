@@ -4301,3 +4301,40 @@ html[data-theme="light"] .source-text-box {
         line-height: 1.7;
     }
 }
+
+/* ================================
+   Summary Actions
+   ================================ */
+
+.summary-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.summary-actions form {
+    margin: 0;
+}
+
+.summary-actions .secondary-btn,
+.summary-actions .primary-btn,
+.summary-actions .small-danger-btn {
+    width: auto;
+}
+
+@media (max-width: 700px) {
+    .summary-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .summary-actions .secondary-btn,
+    .summary-actions .primary-btn,
+    .summary-actions .small-danger-btn,
+    .summary-actions form {
+        width: 100%;
+    }
+}

@@ -146,3 +146,21 @@ class CBTQuestionBank(db.Model):
 
     difficulty = db.Column(db.String(50), default="standard")
     created_at = db.Column(db.DateTime, default=datetime.now)
+
+
+class SavedSummary(db.Model):
+    __tablename__ = "saved_summaries"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    document_id = db.Column(db.Integer, db.ForeignKey("documents.id"), nullable=False)
+
+    title = db.Column(db.String(255), nullable=False)
+    summary_type = db.Column(db.String(50), default="full_document")
+
+    summary_text = db.Column(db.Text, nullable=True)
+    status = db.Column(db.String(50), default="created")
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    document = db.relationship("Document", backref="summaries")

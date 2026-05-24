@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block page_title %}Document Summaries{% endblock %}
+
+{% block content %}
+<section class="summary-shell">
+    <div class="summary-hero">
+        <div>
+            <p class="reader-eyebrow">AI Study Mode</p>
+            <h3>Document Summaries</h3>
+            <p>
+                Select an official document and generate a simple study-friendly summary.
+            </p>
+        </div>
+    </div>
+
+    <div class="summary-layout">
+        <section class="summary-card">
+            <div class="summary-card-header">
+                <h4>Create Summary</h4>
+                <p>Choose one document to summarize.</p>
+            </div>
+
+            <form method="POST" class="summary-form">
+                <label for="document_id">Select document</label>
+
+                <select name="document_id" id="document_id" required>
+                    <option value="">Choose a document</option>
+
+                    {% for document in documents %}
+                        <option value="{{ document.id }}">
+                            {{ document.title }} — {{ document.category or "Uncategorized" }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <p class="upload-limit-note">
+                    For now, this creates a summary request. AI generation will be connected next.
+                </p>
+
+                <button type="submit" class="primary-btn">
+                    Generate Summary
+                </button>
+            </form>
+        </section>
+
+        <aside class="summary-side-panel">
+            <section class="summary-card">
+                <div class="summary-card-header">
+                    <h4>Recent Summaries</h4>
+                    <p>Your generated summaries will appear here.</p>
+                </div>
+
+                {% if recent_summaries %}
+                    <div class="summary-history-list">
+                        {% for summary in recent_summaries %}
+                            <div class="summary-history-item">
+                                <strong>{{ summary.title }}</strong>
+
+                                <p>
+                                    {{ summary.document.title if summary.document else "Unknown document" }}
+                                </p>
+
+                                <span class="summary-status-pill status-{{ summary.status }}">
+                                    {{ summary.status|title }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-mini-state">
+                        <p>No summaries generated yet.</p>
+                    </div>
+                {% endif %}
+            </section>
+        </aside>
+    </div>
+</section>
+{% endblock %}

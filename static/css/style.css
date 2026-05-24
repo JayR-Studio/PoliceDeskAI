@@ -4004,3 +4004,234 @@ html[data-theme="light"] .source-text-box {
         padding: 5px 7px;
     }
 }
+
+/* ================================
+   Document Summaries
+   ================================ */
+
+.summary-shell,
+.summary-shell * {
+    box-sizing: border-box;
+}
+
+.summary-shell {
+    display: grid;
+    gap: 18px;
+    width: 100%;
+    max-width: 100%;
+}
+
+.summary-hero {
+    background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.14), transparent 38%),
+        var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.summary-hero h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 28px;
+    line-height: 1.2;
+}
+
+.summary-hero p {
+    margin: 8px 0 0;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.summary-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 18px;
+    align-items: start;
+}
+
+.summary-card {
+    width: 100%;
+    min-width: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    overflow-wrap: break-word;
+}
+
+.summary-card-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+}
+
+.summary-card-header h4 {
+    margin: 0;
+    color: var(--text);
+    font-size: 20px;
+}
+
+.summary-card-header p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.summary-form {
+    display: grid;
+    gap: 13px;
+}
+
+.summary-form label {
+    color: var(--text);
+    font-weight: 800;
+    font-size: 14px;
+}
+
+.summary-form select {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--card-soft);
+    color: var(--text);
+    border-radius: 14px;
+    padding: 13px;
+    font-weight: 700;
+}
+
+.summary-side-panel {
+    display: grid;
+    gap: 18px;
+    position: sticky;
+    top: 18px;
+}
+
+.summary-history-list {
+    display: grid;
+    gap: 10px;
+}
+
+.summary-history-item {
+    display: grid;
+    gap: 6px;
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    min-width: 0;
+    overflow-wrap: break-word;
+}
+
+.summary-history-item strong {
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+.summary-history-item p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.summary-status-pill {
+    width: fit-content;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 8px;
+    font-size: 11px;
+    font-weight: 850;
+    color: var(--muted);
+    background: var(--card);
+}
+
+.status-created {
+    color: var(--warning);
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.25);
+}
+
+.status-ready {
+    color: var(--success);
+    background: var(--success-bg);
+    border-color: rgba(16, 185, 129, 0.22);
+}
+
+.status-failed {
+    color: var(--error);
+    background: var(--error-bg);
+    border-color: rgba(239, 68, 68, 0.22);
+}
+
+@media (max-width: 950px) {
+    .summary-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-side-panel {
+        position: relative;
+        top: 0;
+    }
+}
+
+@media (max-width: 700px) {
+    .summary-shell {
+        gap: 10px;
+    }
+
+    .summary-hero,
+    .summary-card {
+        padding: 12px;
+        border-radius: 16px;
+    }
+
+    .summary-hero h3 {
+        font-size: 20px;
+    }
+
+    .summary-hero p {
+        font-size: 12.5px;
+        line-height: 1.45;
+    }
+
+    .summary-card-header {
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+    }
+
+    .summary-card-header h4 {
+        font-size: 16px;
+    }
+
+    .summary-card-header p {
+        font-size: 12.5px;
+    }
+
+    .summary-form select {
+        padding: 10px;
+        font-size: 13px;
+        border-radius: 11px;
+    }
+
+    .summary-form .primary-btn {
+        padding: 10px 12px;
+        font-size: 13px;
+        border-radius: 11px;
+    }
+
+    .summary-history-item {
+        padding: 10px;
+        border-radius: 13px;
+    }
+
+    .summary-history-item strong {
+        font-size: 12.5px;
+    }
+
+    .summary-history-item p {
+        font-size: 11.5px;
+    }
+}

@@ -18,7 +18,7 @@ from services.cbt_generator import distribute_questions, generate_question_bank_
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from werkzeug.utils import secure_filename
 from config import Config
-from models import db, Document, DocumentChunk, ChatSession, ChatMessage, CBTSession, CBTQuestion, CBTQuestionBank
+from models import db, Document, DocumentChunk, ChatSession, ChatMessage, CBTSession, CBTQuestion, CBTQuestionBank, SavedSummary
 from datetime import datetime, timedelta
 from sqlalchemy import text
 
@@ -1517,9 +1517,53 @@ def delete_cbt_bank_question(question_id):
     return redirect(request.referrer or url_for("cbt_question_bank"))
 
 
-@app.route("/summaries")
+# --------------------------------------------------------------------------------------------------------------
+#                                    SUMMARY FEATURE
+# ---------------------------------------------------------------------------------------------------------------
+
+
+@app.route("/summaries", methods=["GET", "POST"])
 def summaries():
-    return render_template("coming_soon.html", feature_name="Document Summaries")
+    documents = Document.query.order_by(Document.created_at.desc()).all()
+
+    recent_summaries = (
+        SavedSummary.query
+        .order_by(SavedSummary.created_at.desc())
+        .limit(8)
+        .all()
+    )
+
+    if request.method == "POST":
+        document_id = request.form.get("document_id", type=int)
+
+        if not document_id:
+            flash("Please select a document to summarize.", "error")
+            return redirect(url_for("summaries"))
+
+        document = Document.query.get(document_id)
+
+        if not document:
+            flash("Selected document was not found.", "error")
+            return redirect(url_for("summaries"))
+
+        saved_summary = SavedSummary(
+            document_id=document.id,
+            title=f"Summary of {document.title}",
+            summary_type="full_document",
+            status="created"
+        )
+
+        db.session.add(saved_summary)
+        db.session.commit()
+
+        flash("Summary request created. AI summary generation will be added next.", "success")
+        return redirect(url_for("summaries"))
+
+    return render_template(
+        "summaries.html",
+        documents=documents,
+        recent_summaries=recent_summaries
+    )
 
 
 if __name__ == "__main__":

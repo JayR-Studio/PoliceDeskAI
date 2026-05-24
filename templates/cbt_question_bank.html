@@ -121,7 +121,7 @@
                             </div>
                             {% if question.source_chunk_id %}
                                 <a
-                                    href="{{ url_for('view_chunk_source', chunk_id=question.source_chunk_id) }}"
+                                    href="{{ url_for('view_source', chunk_id=question.source_chunk_id) }}"
                                     class="small-action-btn secondary-action question-source-btn"
                                     target="_blank"
                                 >

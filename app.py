@@ -1363,6 +1363,66 @@ def cbt_result(session_id):
     )
 
 
+def analyze_cbt_question_quality(question):
+    """
+    Returns a list of warning messages for weak CBT questions.
+    This does not delete or change the question.
+    """
+
+    warnings = []
+
+    question_text = (question.question_text or "").strip()
+    options = {
+        "A": (question.option_a or "").strip(),
+        "B": (question.option_b or "").strip(),
+        "C": (question.option_c or "").strip(),
+        "D": (question.option_d or "").strip(),
+    }
+
+    explanation = (question.explanation or "").strip()
+    correct_answer = (question.correct_answer or "").strip().upper()
+
+    if len(question_text) < 25:
+        warnings.append("Question may be too short.")
+
+    if not question_text.endswith("?"):
+        warnings.append("Question does not end with a question mark.")
+
+    if correct_answer not in ["A", "B", "C", "D"]:
+        warnings.append("Invalid correct answer.")
+
+    if not explanation:
+        warnings.append("Missing explanation.")
+
+    if explanation and len(explanation) < 20:
+        warnings.append("Explanation may be too short.")
+
+    for letter, option_text in options.items():
+        if not option_text:
+            warnings.append(f"Option {letter} is empty.")
+
+        elif len(option_text) < 3:
+            warnings.append(f"Option {letter} may be too short.")
+
+    option_values = [value.lower() for value in options.values() if value]
+
+    if len(option_values) != len(set(option_values)):
+        warnings.append("Two or more options are identical.")
+
+    correct_option_text = options.get(correct_answer)
+
+    if correct_option_text:
+        wrong_options = [
+            text for letter, text in options.items()
+            if letter != correct_answer
+        ]
+
+        if correct_option_text in wrong_options:
+            warnings.append("Correct answer text also appears as a wrong option.")
+
+    return warnings
+
+
 @app.route("/cbt/question-bank")
 @admin_required
 def cbt_question_bank():
@@ -1419,13 +1479,19 @@ def cbt_question_bank():
 
         question_sources[question.id] = source_info
 
+    question_quality_flags = {}
+
+    for question in questions:
+        question_quality_flags[question.id] = analyze_cbt_question_quality(question)
+
     return render_template(
         "cbt_question_bank.html",
         documents=documents,
         questions=questions,
         selected_document_id=selected_document_id,
         document_question_counts=document_question_counts,
-        question_sources=question_sources
+        question_sources=question_sources,
+        question_quality_flags=question_quality_flags
     )
 
 

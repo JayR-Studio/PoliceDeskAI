@@ -3902,3 +3902,53 @@ html[data-theme="light"] .source-text-box {
         margin-top: 10px;
     }
 }
+
+/* ================================
+   CBT Question Quality Flags
+   ================================ */
+
+.quality-warning-box,
+.quality-good-box {
+    margin-top: 12px;
+    border-radius: 13px;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.quality-warning-box {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.28);
+    color: var(--text);
+}
+
+.quality-warning-box strong {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--warning);
+}
+
+.quality-warning-box ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.quality-warning-box li {
+    margin-bottom: 4px;
+}
+
+.quality-good-box {
+    background: rgba(16, 185, 129, 0.10);
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    color: var(--success);
+    font-weight: 750;
+}
+
+@media (max-width: 700px) {
+    .quality-warning-box,
+    .quality-good-box {
+        padding: 9px 10px;
+        font-size: 12px;
+        border-radius: 11px;
+    }
+}

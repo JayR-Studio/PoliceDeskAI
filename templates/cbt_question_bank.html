@@ -56,6 +56,7 @@
                 <div class="question-bank-list">
                     {% for question in questions %}
                         <article class="question-bank-card">
+                            {% set quality_flags = question_quality_flags.get(question.id, []) %}
                             <div class="question-bank-top">
                                 <div>
                                     <span class="question-bank-label">
@@ -75,7 +76,21 @@
                                     </button>
                                 </form>
                             </div>
+                            {% if quality_flags %}
+                                <div class="quality-warning-box">
+                                    <strong>Quality warning</strong>
 
+                                    <ul>
+                                        {% for warning in quality_flags %}
+                                            <li>{{ warning }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% else %}
+                                <div class="quality-good-box">
+                                    No obvious quality issues detected.
+                                </div>
+                            {% endif %}
                             <div class="question-bank-options">
                                 <p class="{% if question.correct_answer == 'A' %}correct-bank-option{% endif %}">
                                     <strong>A.</strong> {{ question.option_a }}

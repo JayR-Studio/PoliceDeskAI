@@ -4642,3 +4642,21 @@ body[data-theme="dark"] .real-chat-card .smart-chat-form .answer-style-select {
     cursor: not-allowed;
     transform: none;
 }
+
+/* ================================
+   Brand Logo Icon
+   ================================ */
+
+.brand-logo-icon {
+    padding: 0;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+}
+
+.brand-logo-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}

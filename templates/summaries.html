@@ -7,9 +7,9 @@
     <div class="summary-hero">
         <div>
             <p class="reader-eyebrow">AI Study Mode</p>
-            <h3>Document Summaries</h3>
+            <h3>Police Study Notes</h3>
             <p>
-                Select an official document and generate a simple study-friendly summary.
+                Select an official document and generate practical study notes for revision and CBT preparation.
             </p>
         </div>
     </div>
@@ -17,20 +17,20 @@
     <div class="summary-layout">
         <section class="summary-card">
             <div class="summary-card-header">
-                <h4>Create Summary</h4>
-                <p>Choose one document to summarize.</p>
+                <h4>Create Study Notes</h4>
+                <p>Choose one document to convert into study notes.</p>
             </div>
 
-            <form method="POST" class="summary-form">
+            <form method="POST" class="summary-form" id="summaryForm">
                 <label for="document_id">Select document</label>
 
                 <select name="document_id" id="document_id" required>
                     <option value="">Choose a document</option>
 
                     {% for document in documents %}
-                        <option value="{{ document.id }}">
-                            {{ document.title }} — {{ document.category or "Uncategorized" }}
-                        </option>
+                    <option value="{{ document.id }}">
+                        {{ document.title }} — {{ document.category or "Uncategorized" }}
+                    </option>
                     {% endfor %}
                 </select>
 
@@ -38,8 +38,8 @@
                     For now, this creates a summary request. AI generation will be connected next.
                 </p>
 
-                <button type="submit" class="primary-btn">
-                    Generate Summary
+                <button type="submit" class="primary-btn" id="generateSummaryBtn">
+                    Generate Study Notes
                 </button>
             </form>
         </section>
@@ -52,28 +52,42 @@
                 </div>
 
                 {% if recent_summaries %}
-                    <div class="summary-history-list">
-                        {% for summary in recent_summaries %}
-                            <a href="{{ url_for('view_summary', summary_id=summary.id) }}" class="summary-history-item summary-history-link">
-                                <strong>{{ summary.title }}</strong>
+                <div class="summary-history-list">
+                    {% for summary in recent_summaries %}
+                    <a href="{{ url_for('view_summary', summary_id=summary.id) }}"
+                       class="summary-history-item summary-history-link">
+                        <strong>{{ summary.title }}</strong>
 
-                                <p>
-                                    {{ summary.document.title if summary.document else "Unknown document" }}
-                                </p>
+                        <p>
+                            {{ summary.document.title if summary.document else "Unknown document" }}
+                        </p>
 
-                                <span class="summary-status-pill status-{{ summary.status }}">
+                        <span class="summary-status-pill status-{{ summary.status }}">
                                     {{ summary.status|title }}
                                 </span>
-                            </a>
-                        {% endfor %}
-                    </div>
+                    </a>
+                    {% endfor %}
+                </div>
                 {% else %}
-                    <div class="empty-mini-state">
-                        <p>No summaries generated yet.</p>
-                    </div>
+                <div class="empty-mini-state">
+                    <p>No summaries generated yet.</p>
+                </div>
                 {% endif %}
             </section>
         </aside>
     </div>
 </section>
+<script>
+    const summaryForm = document.getElementById("summaryForm");
+    const generateSummaryBtn = document.getElementById("generateSummaryBtn");
+
+    if (summaryForm) {
+        summaryForm.addEventListener("submit", function () {
+            if (generateSummaryBtn) {
+                generateSummaryBtn.disabled = true;
+                generateSummaryBtn.textContent = "Generating...";
+            }
+        });
+    }
+</script>
 {% endblock %}

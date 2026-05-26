@@ -75,41 +75,58 @@ def generate_document_summary(document):
     system_message = """
     You are PoliceDesk AI, a police document study assistant.
 
-    Your task is to summarize official police documents for easy study.
+    Your task is to turn official police document content into practical study notes for police officers.
 
     Rules:
     - Use ONLY the provided document context.
-    - Do not invent laws, procedures, sections, ranks, or facts.
-    - If the context is incomplete, say the summary is based only on the available extracted sections.
+    - Do not invent laws, procedures, sections, ranks, punishments, or facts.
+    - If the context is incomplete, clearly say the notes are based only on the available extracted sections.
     - Write in clear, simple English.
-    - Use headings.
-    - Focus on what an officer needs to understand.
-    - Avoid unnecessary long explanations.
+    - Make the output useful for study and revision.
+    - Focus on what an officer should understand, remember, and apply.
+    - Avoid long unnecessary explanations.
     - Do not mention chunk IDs.
     - Do not use markdown symbols like **, ##, ###, or bullet asterisks.
     - Do not bold text with asterisks.
-    - Use plain headings written normally.
-    - Use numbered sections and dash bullets only.
+    - Use plain numbered headings.
+    - Use dash bullets only where necessary.
     """
 
     user_message = f"""
-Document title:
-{document.title}
+    Document title:
+    {document.title}
 
-Document category:
-{document.category or "Uncategorized"}
+    Document category:
+    {document.category or "Uncategorized"}
 
-Document context:
-{context}
+    Document context:
+    {context}
 
-Create a study-friendly summary with this structure:
+    Create practical police study notes using this exact structure:
 
-1. Short Overview
-2. Key Points
-3. Important Duties / Procedures Mentioned
-4. Things Officers Should Remember
-5. Suggested Areas to Study Further
-"""
+    1. Simple Overview
+    Give a short, simple explanation of what this document section is about.
+
+    2. Key Points
+    List the most important points an officer should know.
+
+    3. Duties and Procedures Mentioned
+    Explain any police duties, steps, responsibilities, or procedures mentioned in the document.
+
+    4. Officer Takeaways
+    Explain what an officer should remember when applying this knowledge in real police work.
+
+    5. Common Mistakes to Avoid
+    List mistakes an officer may make if they misunderstand this section.
+
+    6. Likely CBT Questions
+    Create 5 likely CBT-style questions from the document context.
+    Do not provide options here. Only list the questions.
+
+    7. Pages or Sections to Study Further
+    Mention the pages or sections from the context that the officer should revisit.
+    If page numbers are not available, refer to section numbers.
+    """
 
     client = get_openai_client()
 
@@ -144,4 +161,16 @@ def clean_summary_text(text):
     cleaned = cleaned.replace("##", "")
     cleaned = cleaned.replace("#", "")
 
-    return cleaned.strip()
+    # Remove markdown bullet asterisks at line starts
+    lines = cleaned.splitlines()
+    cleaned_lines = []
+
+    for line in lines:
+        stripped = line.strip()
+
+        if stripped.startswith("* "):
+            stripped = "- " + stripped[2:]
+
+        cleaned_lines.append(stripped)
+
+    return "\n".join(cleaned_lines).strip()

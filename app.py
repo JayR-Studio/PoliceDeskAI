@@ -1549,7 +1549,7 @@ def summaries():
 
         saved_summary = SavedSummary(
             document_id=document.id,
-            title=f"Summary of {document.title}",
+            title=f"Study Notes: {document.title}",
             summary_type="full_document",
             status="generating"
         )

@@ -4638,3 +4638,9 @@ body[data-theme="dark"] .real-chat-card .smart-chat-form .answer-style-select {
     color: #eaf2ff !important;
     border-color: rgba(148, 163, 184, 0.28) !important;
 }
+
+.summary-form .primary-btn:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+    transform: none;
+}

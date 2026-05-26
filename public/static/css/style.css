@@ -4338,3 +4338,301 @@ html[data-theme="light"] .source-text-box {
         width: 100%;
     }
 }
+
+/* ================================
+   AI Thinking / Perceived Speed
+   ================================ */
+
+.ai-thinking-panel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 10px 14px 0;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.14), transparent 34%),
+        var(--card-solid);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+}
+
+.ai-thinking-panel[hidden] {
+    display: none;
+}
+
+.ai-thinking-orb {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    background: var(--ai-gradient);
+    position: relative;
+    box-shadow: 0 0 22px rgba(56, 189, 248, 0.35);
+    animation: aiPulse 1.3s ease-in-out infinite;
+}
+
+.ai-thinking-orb::after {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border-radius: inherit;
+    background: rgba(255, 255, 255, 0.38);
+}
+
+.ai-thinking-panel strong {
+    display: block;
+    color: var(--text);
+    font-size: 13px;
+}
+
+.ai-thinking-panel p {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+@keyframes aiPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+
+    50% {
+        transform: scale(1.08);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 700px) {
+    .ai-thinking-panel {
+        margin: 8px 10px 0;
+        padding: 10px;
+        border-radius: 14px;
+        gap: 9px;
+    }
+
+    .ai-thinking-orb {
+        width: 28px;
+        height: 28px;
+    }
+
+    .ai-thinking-panel strong {
+        font-size: 12px;
+    }
+
+    .ai-thinking-panel p {
+        font-size: 11px;
+    }
+}
+
+/* Smooth assistant message entrance */
+.assistant-bubble {
+    animation: assistantReveal 0.28s ease both;
+}
+
+@keyframes assistantReveal {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.typewriter-answer::after {
+    content: "▋";
+    display: inline-block;
+    margin-left: 2px;
+    color: var(--blue);
+    animation: cursorBlink 0.8s infinite;
+}
+
+.typewriter-answer.done-typing::after {
+    display: none;
+}
+
+@keyframes cursorBlink {
+    0%, 45% {
+        opacity: 1;
+    }
+
+    46%, 100% {
+        opacity: 0;
+    }
+}
+
+/* ================================
+   Auto-growing Chat Input
+   ================================ */
+
+.chat-auto-textarea {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    min-height: 44px;
+    max-height: 140px;
+    resize: none;
+    overflow-y: hidden;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding: 12px 14px;
+    background: var(--card-solid);
+    color: var(--text);
+    outline: none;
+    line-height: 1.45;
+    font-size: 14px;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.chat-auto-textarea:focus {
+    border-color: rgba(37, 99, 235, 0.55);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.real-chat-card .smart-chat-form .chat-auto-textarea {
+    width: 100%;
+    min-width: 0;
+}
+
+@media (max-width: 800px) {
+    .real-chat-card .smart-chat-form .chat-auto-textarea {
+        min-height: 40px;
+        max-height: 110px;
+        font-size: 13px;
+        padding: 10px;
+        border-radius: 12px;
+    }
+}
+
+@media (max-width: 390px) {
+    .real-chat-card .smart-chat-form .chat-auto-textarea {
+        font-size: 12px;
+        padding: 9px;
+    }
+}
+
+/* ================================
+   Chat Composer Layout Fix
+   textarea expands, controls stay right
+   ================================ */
+
+.real-chat-card .smart-chat-form {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 220px 120px !important;
+    align-items: end !important;
+    gap: 12px !important;
+}
+
+.real-chat-card .smart-chat-form .chat-auto-textarea {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto;
+}
+
+.real-chat-card .smart-chat-form .answer-style-select {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.real-chat-card .smart-chat-form button {
+    width: 100% !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+    .real-chat-card .smart-chat-form {
+        grid-template-columns: minmax(0, 1fr) 160px 90px !important;
+        gap: 8px !important;
+    }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .real-chat-card .smart-chat-form {
+        grid-template-columns: minmax(0, 1fr) 92px 64px !important;
+        gap: 6px !important;
+        align-items: end !important;
+    }
+
+    .real-chat-card .smart-chat-form .chat-auto-textarea {
+        min-height: 40px !important;
+        max-height: 110px !important;
+        font-size: 12.5px !important;
+        padding: 9px !important;
+        border-radius: 12px !important;
+    }
+
+    .real-chat-card .smart-chat-form .answer-style-select {
+        height: 40px !important;
+        font-size: 11.5px !important;
+        padding: 8px 5px !important;
+        border-radius: 12px !important;
+    }
+
+    .real-chat-card .smart-chat-form button {
+        height: 40px !important;
+        font-size: 11.5px !important;
+        padding: 8px 5px !important;
+        border-radius: 12px !important;
+    }
+}
+
+/* ================================
+   Dark Theme Chat Composer Fix
+   ================================ */
+
+html[data-theme="dark"] .real-chat-card .smart-chat-form .chat-auto-textarea,
+html[data-theme="dark"] .real-chat-card .smart-chat-form .answer-style-select {
+    background: #020817 !important;
+    color: #eaf2ff !important;
+    border-color: rgba(148, 163, 184, 0.22) !important;
+}
+
+html[data-theme="dark"] .real-chat-card .smart-chat-form .chat-auto-textarea::placeholder {
+    color: #7f8ea8 !important;
+}
+
+html[data-theme="dark"] .real-chat-card .smart-chat-form .chat-auto-textarea:focus,
+html[data-theme="dark"] .real-chat-card .smart-chat-form .answer-style-select:focus {
+    border-color: rgba(56, 189, 248, 0.55) !important;
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.12) !important;
+}
+
+/* ================================
+   Force Dark Theme Composer Fields
+   ================================ */
+
+html[data-theme="dark"] textarea.chat-auto-textarea,
+html[data-theme="dark"] .chat-auto-textarea,
+html[data-theme="dark"] .real-chat-card .smart-chat-form textarea,
+html[data-theme="dark"] .real-chat-card .smart-chat-form .chat-auto-textarea,
+body[data-theme="dark"] textarea.chat-auto-textarea,
+body[data-theme="dark"] .chat-auto-textarea,
+body[data-theme="dark"] .real-chat-card .smart-chat-form textarea,
+body[data-theme="dark"] .real-chat-card .smart-chat-form .chat-auto-textarea {
+    background-color: #020817 !important;
+    background: #020817 !important;
+    color: #eaf2ff !important;
+    border-color: rgba(148, 163, 184, 0.28) !important;
+}
+
+html[data-theme="dark"] textarea.chat-auto-textarea::placeholder,
+html[data-theme="dark"] .chat-auto-textarea::placeholder,
+body[data-theme="dark"] textarea.chat-auto-textarea::placeholder,
+body[data-theme="dark"] .chat-auto-textarea::placeholder {
+    color: #7f8ea8 !important;
+}
+
+html[data-theme="dark"] .real-chat-card .smart-chat-form .answer-style-select,
+body[data-theme="dark"] .real-chat-card .smart-chat-form .answer-style-select {
+    background-color: #020817 !important;
+    background: #020817 !important;
+    color: #eaf2ff !important;
+    border-color: rgba(148, 163, 184, 0.28) !important;
+}

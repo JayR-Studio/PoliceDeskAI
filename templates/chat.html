@@ -70,8 +70,17 @@
         <div class="chat-message-row assistant-row">
             <div class="message-bubble assistant-bubble">
                 <strong>PoliceDesk AI</strong>
-                <div class="assistant-answer">
-                    {{ message.content | replace('\n', '<br>') | safe }}
+                <div
+                        class="assistant-answer {% if loop.last %}typewriter-answer{% endif %}"
+                        {% if loop.last %}
+                        data-full-answer="{{ message.content | e }}"
+                        {% endif %}
+                >
+                    {% if loop.last %}
+                    {{ message.content }}
+                    {% else %}
+                    {{ message.content }}
+                    {% endif %}
                 </div>
 
                 {% if message.sources_json %}
@@ -128,14 +137,23 @@
         {% endif %}
     </div>
 
+    <div class="ai-thinking-panel" id="aiThinkingPanel" hidden>
+        <div class="ai-thinking-orb"></div>
+
+        <div>
+            <strong id="aiThinkingTitle">PoliceDesk AI is working...</strong>
+            <p id="aiThinkingText">Searching official documents...</p>
+        </div>
+    </div>
+
     <form method="POST" class="chat-form active-chat-form smart-chat-form" id="chatForm">
-        <input
+        <textarea
                 type="text"
                 name="query"
-                id="queryInput"
+                id="chatInput"
                 placeholder="Ask from the uploaded police documents..."
                 required
-        >
+        > </textarea>
 
         <select name="answer_style" class="answer-style-select">
             <option value="auto" selected>Auto Style</option>
@@ -145,92 +163,116 @@
             <option value="summary">Short Summary</option>
         </select>
 
-        <button type="submit" id="sendButton">Ask</button>
+        <button type="submit" id="chatSubmitBtn">Ask AI</button>
     </form>
 </section>
 
 <script>
-    const conversationWindow = document.getElementById("conversationWindow");
     const chatForm = document.getElementById("chatForm");
-    const queryInput = document.getElementById("queryInput");
-    const sendButton = document.getElementById("sendButton");
-    const presetButtons = document.querySelectorAll(".preset-btn");
-    const answerStyleSelect = document.getElementById("answerStyleSelect");
+    const chatInput = document.getElementById("chatInput");
+    const chatSubmitBtn = document.getElementById("chatSubmitBtn");
+    const aiThinkingPanel = document.getElementById("aiThinkingPanel");
+    const aiThinkingText = document.getElementById("aiThinkingText");
 
-    function scrollConversationToBottom() {
-        if (conversationWindow) {
-            conversationWindow.scrollTop = conversationWindow.scrollHeight;
-        }
+    function autoResizeChatInput() {
+        if (!chatInput) return;
+
+        chatInput.style.height = "auto";
+
+        const maxHeight = 140;
+        const newHeight = Math.min(chatInput.scrollHeight, maxHeight);
+
+        chatInput.style.height = newHeight + "px";
+        chatInput.style.overflowY = chatInput.scrollHeight > maxHeight ? "auto" : "hidden";
     }
 
-    function focusInput() {
-        if (queryInput && window.innerWidth > 768) {
-            queryInput.focus();
-        }
-    }
+    if (chatInput) {
+        chatInput.addEventListener("input", autoResizeChatInput);
+        autoResizeChatInput();
 
-    // When page loads after a response, keep user around the chat area
-    window.addEventListener("load", function () {
-        scrollConversationToBottom();
-        focusInput();
+        chatInput.addEventListener("keydown", function (event) {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
 
-        const hasMessages = conversationWindow.dataset.hasMessages === "true";
-
-        if (hasMessages) {
-            const chatCard = document.querySelector(".real-chat-card");
-
-            if (chatCard) {
-                chatCard.scrollIntoView({
-                    behavior: "instant",
-                    block: "start"
-                });
-            }
-        }
-    });
-
-    presetButtons.forEach((button) => {
-        button.addEventListener("click", function () {
-            const prompt = this.dataset.prompt;
-            const style = this.dataset.style || "auto";
-
-            queryInput.value = prompt;
-
-            if (answerStyleSelect) {
-                answerStyleSelect.value = style;
-            }
-
-            queryInput.focus();
-
-            if (window.innerWidth <= 768) {
-                queryInput.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
-                });
+                if (chatForm && chatInput.value.trim()) {
+                    chatForm.requestSubmit();
+                }
             }
         });
-    });
+    }
 
-    chatForm.addEventListener("submit", function () {
-        const question = queryInput.value.trim();
+    const thinkingSteps = [
+        "Searching official documents...",
+        "Reading relevant sections...",
+        "Checking source references...",
+        "Preparing a clear answer..."
+    ];
 
-        if (!question) {
-            return;
+    if (chatForm) {
+        chatForm.addEventListener("submit", function () {
+            if (aiThinkingPanel) {
+                aiThinkingPanel.hidden = false;
+            }
+
+            if (chatSubmitBtn) {
+                chatSubmitBtn.disabled = true;
+                chatSubmitBtn.textContent = "Working...";
+            }
+
+            if (chatInput) {
+                chatInput.readOnly = true;
+            }
+
+            let stepIndex = 0;
+
+            setInterval(function () {
+                stepIndex = (stepIndex + 1) % thinkingSteps.length;
+
+                if (aiThinkingText) {
+                    aiThinkingText.textContent = thinkingSteps[stepIndex];
+                }
+            }, 1600);
+        });
+    }
+
+    const latestAnswer = document.querySelector(".typewriter-answer");
+
+    if (latestAnswer) {
+        const fullAnswer = latestAnswer.dataset.fullAnswer || latestAnswer.textContent.trim();
+
+        latestAnswer.innerHTML = "";
+
+        let index = 0;
+        const speed = 8;
+
+        function escapeHtml(text) {
+            return text
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
         }
 
-        sendButton.disabled = true;
-        sendButton.textContent = "Thinking...";
+        function typeAnswer() {
+            if (index <= fullAnswer.length) {
+                const visibleText = fullAnswer.slice(0, index);
+                latestAnswer.innerHTML = escapeHtml(visibleText).replace(/\n/g, "<br>");
+                index++;
 
-        const thinkingRow = document.createElement("div");
-        thinkingRow.className = "chat-message-row assistant-row";
-        thinkingRow.innerHTML = `
-            <div class="message-bubble assistant-bubble thinking-bubble">
-                <strong>PoliceDesk AI</strong>
-                <p>Thinking...</p>
-            </div>
-        `;
+                setTimeout(typeAnswer, speed);
+            } else {
+                latestAnswer.classList.add("done-typing");
+            }
+        }
 
-        conversationWindow.appendChild(thinkingRow);
-        scrollConversationToBottom();
-    });
+        setTimeout(typeAnswer, 250);
+    }
+
+    const conversationWindow = document.getElementById("conversationWindow");
+
+    if (conversationWindow) {
+        conversationWindow.scrollTop = conversationWindow.scrollHeight;
+    }
 </script>
 {% endblock %}

@@ -16,7 +16,8 @@ from services.summary_generator import generate_document_summary
 from services.cbt_generator import distribute_questions, generate_question_bank_batch, get_random_bank_questions, \
     count_question_bank_for_document
 
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session, send_from_directory, \
+    Response
 from werkzeug.utils import secure_filename
 from config import Config
 from models import db, Document, DocumentChunk, ChatSession, ChatMessage, CBTSession, CBTQuestion, CBTQuestionBank, SavedSummary
@@ -984,6 +985,93 @@ def view_original_document(document_id):
 #         return redirect(url_for("documents"))
 
 
+@app.route("/manifest.json")
+def manifest_json():
+    manifest = {
+        "id": "/",
+        "name": "PoliceDesk AI",
+        "short_name": "PoliceDesk",
+        "description": "AI-powered police document assistant for study, CBT practice, and official document reference.",
+        "start_url": "/?source=pwa",
+        "scope": "/",
+        "display": "standalone",
+        "orientation": "portrait",
+        "background_color": "#020817",
+        "theme_color": "#020817",
+        "icons": [
+            {
+                "src": "/static/icons/icon-192.png",
+                "sizes": "192x192",
+                "type": "image/png"
+            },
+            {
+                "src": "/static/icons/icon-512.png",
+                "sizes": "512x512",
+                "type": "image/png"
+            }
+        ]
+    }
+
+    return jsonify(manifest)
+
+
+@app.route("/sw.js")
+def service_worker():
+    sw_code = """
+const CACHE_NAME = "policedesk-ai-v3";
+
+const STATIC_ASSETS = [
+    "/",
+    "/static/css/style.css",
+    "/static/js/theme-toggle.js",
+    "/manifest.json",
+    "/static/icons/icon-192.png",
+    "/static/icons/icon-512.png",
+    "/static/icons/favicon.ico"
+];
+
+self.addEventListener("install", function (event) {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then(function (cache) {
+            return cache.addAll(STATIC_ASSETS);
+        })
+    );
+
+    self.skipWaiting();
+});
+
+self.addEventListener("activate", function (event) {
+    event.waitUntil(
+        caches.keys().then(function (cacheNames) {
+            return Promise.all(
+                cacheNames.map(function (cacheName) {
+                    if (cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+
+    self.clients.claim();
+});
+
+self.addEventListener("fetch", function (event) {
+    if (event.request.method !== "GET") {
+        return;
+    }
+
+    event.respondWith(
+        fetch(event.request).catch(function () {
+            return caches.match(event.request);
+        })
+    );
+});
+"""
+
+    return Response(sw_code, mimetype="application/javascript")
+
+
 @app.route("/health")
 def health_check():
     return {
@@ -1620,7 +1708,6 @@ def manifest():
 @app.route("/sw.js")
 def service_worker():
     return send_from_directory("public", "sw.js", mimetype="application/javascript")
-
 
 
 if __name__ == "__main__":

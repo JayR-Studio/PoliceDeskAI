@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+import re
 from functools import wraps
 from dotenv import load_dotenv
 
@@ -52,6 +53,35 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 def get_max_direct_upload_bytes():
     max_mb = int(os.getenv("MAX_DIRECT_UPLOAD_MB", "4"))
     return max_mb * 1024 * 1024
+
+
+def clean_ai_answer_for_users(answer):
+    if not answer:
+        return ""
+
+    # Remove patterns like (Source 1, Chunk 58), (source 2), [Chunk 44], etc.
+    answer = re.sub(
+        r"\s*[\(\[]\s*source\s*\d+\s*,?\s*chunk\s*\d+\s*[\)\]]",
+        "",
+        answer,
+        flags=re.IGNORECASE
+    )
+
+    answer = re.sub(
+        r"\s*[\(\[]\s*source\s*\d+\s*[\)\]]",
+        "",
+        answer,
+        flags=re.IGNORECASE
+    )
+
+    answer = re.sub(
+        r"\s*[\(\[]\s*chunk\s*\d+\s*[\)\]]",
+        "",
+        answer,
+        flags=re.IGNORECASE
+    )
+
+    return answer.strip()
 
 
 def uploaded_file_is_too_large(file):
@@ -605,7 +635,7 @@ def chat():
                     chat_history=recent_history
                 )
 
-                assistant_text = rag_answer["answer"]
+                assistant_text = clean_ai_answer_for_users(rag_answer["answer"])
                 sources = rag_answer["sources"]
 
             assistant_message = ChatMessage(

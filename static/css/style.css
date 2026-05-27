@@ -4662,3 +4662,223 @@ body[data-theme="dark"] .real-chat-card .smart-chat-form .answer-style-select {
     object-fit: cover;
     display: block;
 }
+
+/* ================================
+   Dedicated Chat Page Layout
+   ================================ */
+
+.chat-page .topbar {
+    display: none;
+}
+
+.chat-page .main-content {
+    padding-top: 0;
+}
+
+@media (max-width: 800px) {
+    .chat-page .main-content {
+        padding: 0;
+    }
+}
+
+/* ================================
+   Mobile Chat Header + Sidebar
+   ================================ */
+
+.mobile-chat-header {
+    display: none;
+}
+
+.chat-sidebar-backdrop {
+    display: none;
+}
+
+@media (max-width: 800px) {
+    .chat-page .app-shell {
+        display: block;
+    }
+
+    .chat-page .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: min(82vw, 320px);
+        height: 100vh;
+        z-index: 1000;
+        transform: translateX(-105%);
+        transition: transform 0.22s ease;
+        overflow-y: auto;
+    }
+
+    .chat-page .sidebar.sidebar-open {
+        transform: translateX(0);
+    }
+
+    .chat-sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        background: rgba(2, 8, 23, 0.62);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+
+    .chat-sidebar-backdrop.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .mobile-chat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        position: sticky;
+        top: 0;
+        z-index: 800;
+        padding: 10px 12px;
+        background: rgba(2, 8, 23, 0.92);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .chat-menu-btn,
+    .chat-more-btn {
+        width: 42px;
+        height: 42px;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        background: rgba(15, 23, 42, 0.92);
+        color: #eaf2ff;
+        border-radius: 999px;
+        font-size: 22px;
+        font-weight: 800;
+        display: grid;
+        place-items: center;
+    }
+
+    .chat-more-btn {
+        font-size: 24px;
+    }
+
+    .mobile-chat-title {
+        flex: 1;
+        min-width: 0;
+        display: grid;
+        text-align: center;
+        line-height: 1.2;
+    }
+
+    .mobile-chat-title strong {
+        color: #eaf2ff;
+        font-size: 15px;
+    }
+
+    .mobile-chat-title span {
+        color: #93a4bd;
+        font-size: 12px;
+    }
+}
+
+/* ================================
+   Chat Page Mobile Spacious Layout
+   ================================ */
+
+@media (max-width: 800px) {
+    .chat-page .real-chat-card {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        min-height: calc(100vh - 64px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-page .chat-header-row {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .chat-page .compact-intro {
+        display: none;
+    }
+
+    .chat-page .clear-chat-btn {
+        padding: 8px 10px;
+        font-size: 12px;
+        border-radius: 10px;
+    }
+
+    .chat-page .prompt-presets {
+        padding: 8px 10px;
+        gap: 7px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+
+    .chat-page .preset-btn {
+        flex: 0 0 auto;
+        font-size: 12px;
+        padding: 8px 10px;
+        border-radius: 999px;
+        white-space: nowrap;
+    }
+
+    .chat-page .conversation-window {
+        flex: 1;
+        min-height: 0;
+        max-height: none;
+        padding: 12px 10px;
+    }
+
+    .chat-page .message-bubble {
+        max-width: 92%;
+        padding: 12px;
+        border-radius: 16px;
+    }
+
+    .chat-page .assistant-bubble {
+        max-width: 96%;
+    }
+
+    .chat-page .chat-form {
+        position: sticky;
+        bottom: 0;
+        z-index: 700;
+        padding: 8px;
+        background: rgba(2, 8, 23, 0.94);
+        backdrop-filter: blur(14px);
+        border-top: 1px solid rgba(148, 163, 184, 0.16);
+    }
+}
+
+@media (max-width: 600px) {
+    .chat-page .real-chat-card .smart-chat-form {
+        grid-template-columns: minmax(0, 1fr) 90px 62px !important;
+        gap: 6px !important;
+        align-items: end !important;
+    }
+
+    .chat-page .chat-auto-textarea {
+        min-height: 42px !important;
+        max-height: 120px !important;
+        padding: 10px !important;
+        font-size: 13px !important;
+        border-radius: 14px !important;
+    }
+
+    .chat-page .answer-style-select {
+        height: 42px !important;
+        font-size: 11px !important;
+        padding: 6px !important;
+        border-radius: 14px !important;
+    }
+
+    .chat-page .smart-chat-form button {
+        height: 42px !important;
+        font-size: 11px !important;
+        padding: 6px !important;
+        border-radius: 14px !important;
+    }
+}

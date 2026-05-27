@@ -16,7 +16,7 @@ from services.summary_generator import generate_document_summary
 from services.cbt_generator import distribute_questions, generate_question_bank_batch, get_random_bank_questions, \
     count_question_bank_for_document
 
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session, send_from_directory
 from werkzeug.utils import secure_filename
 from config import Config
 from models import db, Document, DocumentChunk, ChatSession, ChatMessage, CBTSession, CBTQuestion, CBTQuestionBank, SavedSummary
@@ -1610,6 +1610,17 @@ def delete_summary(summary_id):
         flash(f"Failed to delete summary: {str(e)}", "error")
 
     return redirect(url_for("summaries"))
+
+
+@app.route("/manifest.json")
+def manifest():
+    return send_from_directory("public", "manifest.json", mimetype="application/manifest+json")
+
+
+@app.route("/sw.js")
+def service_worker():
+    return send_from_directory("public", "sw.js", mimetype="application/javascript")
+
 
 
 if __name__ == "__main__":

@@ -1016,7 +1016,7 @@ def manifest_json():
 
 
 @app.route("/sw.js")
-def service_worker():
+def pwa_service_worker():
     sw_code = """
 const CACHE_NAME = "policedesk-ai-v3";
 
@@ -1698,16 +1698,6 @@ def delete_summary(summary_id):
         flash(f"Failed to delete summary: {str(e)}", "error")
 
     return redirect(url_for("summaries"))
-
-
-@app.route("/manifest.json")
-def manifest():
-    return send_from_directory("public", "manifest.json", mimetype="application/manifest+json")
-
-
-@app.route("/sw.js")
-def service_worker():
-    return send_from_directory("public", "sw.js", mimetype="application/javascript")
 
 
 if __name__ == "__main__":

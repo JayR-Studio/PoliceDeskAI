@@ -18,7 +18,7 @@ class Document(db.Model):
     storage_path = db.Column(db.String(500), nullable=True)
     storage_url = db.Column(db.Text, nullable=True)
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
 
     chunks = db.relationship(
         "DocumentChunk",
@@ -91,7 +91,7 @@ class CBTSession(db.Model):
     status = db.Column(db.String(50), default="created")
     recommendation = db.Column(db.Text, nullable=True)
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
     completed_at = db.Column(db.DateTime, nullable=True)
 
     questions = db.relationship(
@@ -161,6 +161,73 @@ class SavedSummary(db.Model):
     summary_text = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(50), default="created")
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
 
     document = db.relationship("Document", backref="summaries")
+    
+
+class User(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    full_name = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+
+    role = db.Column(db.String(50), default="user")
+    account_status = db.Column(db.String(50), default="trial")
+
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    last_login = db.Column(db.DateTime, nullable=True)
+
+    subscriptions = db.relationship(
+        "UserSubscription",
+        backref="user",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+    usage_logs = db.relationship(
+        "UsageLog",
+        backref="user",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+
+class UserSubscription(db.Model):
+    __tablename__ = "user_subscriptions"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    plan_name = db.Column(db.String(50), default="free_trial")
+    payment_status = db.Column(db.String(50), default="pending")
+
+    amount_paid = db.Column(db.Integer, default=0)
+    currency = db.Column(db.String(10), default="NGN")
+
+    starts_at = db.Column(db.DateTime, nullable=True)
+    expires_at = db.Column(db.DateTime, nullable=True)
+
+    created_at = db.Column(db.DateTime, default=datetime.now)
+
+
+class UsageLog(db.Model):
+    __tablename__ = "usage_logs"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    action_type = db.Column(db.String(50), nullable=False)
+
+    month = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+
+    count = db.Column(db.Integer, default=0)
+
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)

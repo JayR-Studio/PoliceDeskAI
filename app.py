@@ -21,7 +21,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
     Response
 from werkzeug.utils import secure_filename
 from config import Config
-from models import db, Document, DocumentChunk, ChatSession, ChatMessage, CBTSession, CBTQuestion, CBTQuestionBank, SavedSummary
+from models import (db, Document, DocumentChunk, ChatSession, ChatMessage, CBTSession, CBTQuestion, CBTQuestionBank,
+                    SavedSummary, User, UserSubscription, UsageLog)
 from datetime import datetime, timedelta
 from sqlalchemy import text
 
@@ -615,7 +616,8 @@ def chat():
             latest_results = semantic_search(query, limit=5)
 
             if not latest_results:
-                assistant_text = "I could not find relevant information in the uploaded police documents. You may need to upload or generate embeddings for the right document."
+                assistant_text = ("I could not find relevant information in the uploaded police documents."
+                                  " You may need to upload or generate embeddings for the right document.")
                 sources = []
             else:
                 recent_history = (

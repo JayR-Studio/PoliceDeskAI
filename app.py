@@ -58,6 +58,108 @@ def get_max_direct_upload_bytes():
     return max_mb * 1024 * 1024
 
 
+PLAN_LIMITS = {
+    "free_trial": {
+        "ai_chat": 10,
+        "study_note": 1,
+        "cbt_exam": 2
+    },
+    "basic": {
+        "ai_chat": 50,
+        "study_note": 3,
+        "cbt_exam": 999999
+    },
+    "standard": {
+        "ai_chat": 150,
+        "study_note": 10,
+        "cbt_exam": 999999
+    },
+    "premium": {
+        "ai_chat": 300,
+        "study_note": 20,
+        "cbt_exam": 999999
+    }
+}
+
+
+def get_active_subscription(user):
+    if not user:
+        return None
+
+    active_subscription = (
+        UserSubscription.query
+        .filter_by(user_id=user.id)
+        .order_by(UserSubscription.created_at.desc())
+        .first()
+    )
+
+    return active_subscription
+
+
+def user_can_perform_action(action_type):
+    current_user = get_current_user()
+
+    if not current_user:
+        return False, "Please login to continue."
+
+    if current_user.account_status == "suspended":
+        return False, "Your account has been suspended. Please contact admin."
+
+    active_subscription = get_active_subscription(current_user)
+
+    if not active_subscription:
+        return False, "No active subscription found. Please contact admin."
+
+    if active_subscription.expires_at and active_subscription.expires_at < datetime.now():
+        return False, "Your subscription has expired. Please renew your plan."
+
+    plan_name = active_subscription.plan_name or "free_trial"
+
+    plan_limits = PLAN_LIMITS.get(plan_name, PLAN_LIMITS["free_trial"])
+
+    allowed_limit = plan_limits.get(action_type, 0)
+
+    usage_log = get_or_create_usage_log(
+        user_id=current_user.id,
+        action_type=action_type
+    )
+
+    if usage_log.count >= allowed_limit:
+        return False, f"You have reached your {action_type.replace('_', ' ')} limit for your current plan."
+
+    return True, "Allowed"
+
+
+def get_user_plan_usage_summary(user):
+    active_subscription = get_active_subscription(user)
+
+    if active_subscription:
+        plan_name = active_subscription.plan_name or "free_trial"
+    else:
+        plan_name = "free_trial"
+
+    plan_limits = PLAN_LIMITS.get(plan_name, PLAN_LIMITS["free_trial"])
+
+    month, year = get_current_month_year()
+
+    usage_logs = (
+        UsageLog.query
+        .filter_by(user_id=user.id, month=month, year=year)
+        .all()
+    )
+
+    usage_summary = {
+        "ai_chat": 0,
+        "study_note": 0,
+        "cbt_exam": 0
+    }
+
+    for log in usage_logs:
+        usage_summary[log.action_type] = log.count
+
+    return active_subscription, plan_limits, usage_summary
+
+
 def clean_ai_answer_for_users(answer):
     if not answer:
         return ""
@@ -677,6 +779,12 @@ def chat():
             flash("Please enter a question.", "error")
             return redirect(url_for("chat"))
 
+        can_use_chat, limit_message = user_can_perform_action("ai_chat")
+
+        if not can_use_chat:
+            flash(limit_message, "error")
+            return redirect(url_for("chat"))
+
         user_message = ChatMessage(
             session_id=chat_session.id,
             role="user",
@@ -1287,6 +1395,12 @@ def cbt():
             )
             return redirect(url_for("cbt"))
 
+        can_start_cbt, limit_message = user_can_perform_action("cbt_exam")
+
+        if not can_start_cbt:
+            flash(limit_message, "error")
+            return redirect(url_for("cbt"))
+
         selected_titles = [document.title for document in selected_document_objects]
 
         session_title = " + ".join(selected_titles[:2])
@@ -1753,6 +1867,12 @@ def summaries():
             flash("Selected document was not found.", "error")
             return redirect(url_for("summaries"))
 
+        can_generate_summary, limit_message = user_can_perform_action("study_note")
+
+        if not can_generate_summary:
+            flash(limit_message, "error")
+            return redirect(url_for("summaries"))
+
         saved_summary = SavedSummary(
             document_id=document.id,
             title=f"Study Notes: {document.title}",
@@ -1942,35 +2062,17 @@ def usage_dashboard():
 
     month, year = get_current_month_year()
 
-    usage_logs = (
-        UsageLog.query
-        .filter_by(user_id=current_user.id, month=month, year=year)
-        .all()
-    )
-
-    usage_summary = {
-        "ai_chat": 0,
-        "study_note": 0,
-        "cbt_exam": 0
-    }
-
-    for log in usage_logs:
-        usage_summary[log.action_type] = log.count
-
-    active_subscription = (
-        UserSubscription.query
-        .filter_by(user_id=current_user.id)
-        .order_by(UserSubscription.created_at.desc())
-        .first()
-    )
+    active_subscription, plan_limits, usage_summary = get_user_plan_usage_summary(current_user)
 
     return render_template(
         "usage.html",
         current_user=current_user,
         usage_summary=usage_summary,
+        plan_limits=plan_limits,
         month=month,
         year=year,
-        active_subscription=active_subscription
+        active_subscription=active_subscription,
+        now=datetime.now()
     )
 
 

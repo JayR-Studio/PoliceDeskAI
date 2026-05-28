@@ -5200,3 +5200,12 @@ body[data-theme="dark"] .real-chat-card .smart-chat-form .answer-style-select {
         border-radius: 18px;
     }
 }
+
+.usage-warning-box {
+    background: rgba(239, 68, 68, 0.10);
+    border: 1px solid rgba(239, 68, 68, 0.24);
+    color: var(--error);
+    padding: 12px;
+    border-radius: 14px;
+    font-weight: 800;
+}

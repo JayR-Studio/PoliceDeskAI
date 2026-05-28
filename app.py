@@ -23,6 +23,8 @@ from werkzeug.utils import secure_filename
 from config import Config
 from models import (db, Document, DocumentChunk, ChatSession, ChatMessage, CBTSession, CBTQuestion, CBTQuestionBank,
                     SavedSummary, User, UserSubscription, UsageLog)
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 from datetime import datetime, timedelta
 from sqlalchemy import text
 
@@ -113,6 +115,27 @@ def get_or_create_chat_session():
     session["chat_session_id"] = new_session.id
 
     return new_session
+
+
+def get_current_user():
+    user_id = session.get("user_id")
+
+    if not user_id:
+        return None
+
+    return User.query.get(user_id)
+
+
+def user_required(route_function):
+    @wraps(route_function)
+    def wrapper(*args, **kwargs):
+        if not session.get("user_id"):
+            flash("Please login to continue.", "error")
+            return redirect(url_for("login"))
+
+        return route_function(*args, **kwargs)
+
+    return wrapper
 
 
 def is_admin_logged_in():
@@ -1381,7 +1404,7 @@ def submit_cbt(session_id):
     cbt_session.score = score
     cbt_session.percentage = percentage
     cbt_session.status = "completed"
-    cbt_session.completed_at = datetime.utcnow()
+    cbt_session.completed_at = datetime.now()
 
     db.session.commit()
 
@@ -1730,6 +1753,116 @@ def delete_summary(summary_id):
         flash(f"Failed to delete summary: {str(e)}", "error")
 
     return redirect(url_for("summaries"))
+
+
+# --------------------------------------------------------------------------------------------------------------
+#                                    AUTH FEATURES
+# ---------------------------------------------------------------------------------------------------------------
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if session.get("user_id"):
+        return redirect(url_for("index"))
+
+    if request.method == "POST":
+        full_name = request.form.get("full_name", "").strip()
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "").strip()
+        confirm_password = request.form.get("confirm_password", "").strip()
+
+        if not full_name or not email or not password:
+            flash("Please fill in all required fields.", "error")
+            return redirect(url_for("register"))
+
+        if password != confirm_password:
+            flash("Passwords do not match.", "error")
+            return redirect(url_for("register"))
+
+        existing_user = User.query.filter_by(email=email).first()
+
+        if existing_user:
+            flash("An account with this email already exists.", "error")
+            return redirect(url_for("register"))
+
+        new_user = User(
+            full_name=full_name,
+            email=email,
+            password_hash=generate_password_hash(password),
+            role="user",
+            account_status="trial"
+        )
+
+        db.session.add(new_user)
+        db.session.flush()
+
+        trial_subscription = UserSubscription(
+            user_id=new_user.id,
+            plan_name="free_trial",
+            payment_status="active",
+            amount_paid=0,
+            currency="NGN",
+            starts_at=datetime.now(),
+            expires_at=datetime.now() + timedelta(days=7)
+        )
+
+        db.session.add(trial_subscription)
+        db.session.commit()
+
+        session["user_id"] = new_user.id
+        session["user_name"] = new_user.full_name
+        session["user_role"] = new_user.role
+
+        flash("Account created successfully. Welcome to PoliceDesk AI.", "success")
+        return redirect(url_for("index"))
+
+    return render_template("register.html")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if session.get("user_id"):
+        return redirect(url_for("index"))
+
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "").strip()
+
+        if not email or not password:
+            flash("Please enter your email and password.", "error")
+            return redirect(url_for("login"))
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user or not check_password_hash(user.password_hash, password):
+            flash("Invalid email or password.", "error")
+            return redirect(url_for("login"))
+
+        if user.account_status == "suspended":
+            flash("Your account has been suspended. Please contact admin.", "error")
+            return redirect(url_for("login"))
+
+        user.last_login = datetime.now()
+        db.session.commit()
+
+        session["user_id"] = user.id
+        session["user_name"] = user.full_name
+        session["user_role"] = user.role
+
+        flash("Login successful.", "success")
+        return redirect(url_for("index"))
+
+    return render_template("login.html")
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.pop("user_id", None)
+    session.pop("user_name", None)
+    session.pop("user_role", None)
+
+    flash("You have been logged out.", "success")
+    return redirect(url_for("login"))
 
 
 if __name__ == "__main__":

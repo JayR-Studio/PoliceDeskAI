@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block page_title %}Login{% endblock %}
+
+{% block content %}
+<section class="auth-shell">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h3>Welcome back</h3>
+            <p>Login to continue using PoliceDesk AI.</p>
+        </div>
+
+        <form method="POST" class="auth-form">
+            <label for="email">Email address</label>
+            <input type="email" name="email" id="email" required>
+
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" required>
+
+            <button type="submit" class="primary-btn">Login</button>
+        </form>
+
+        <p class="auth-switch-text">
+            New here?
+            <a href="{{ url_for('register') }}">Create an account</a>
+        </p>
+    </div>
+</section>
+{% endblock %}

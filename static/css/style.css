@@ -4882,3 +4882,108 @@ body[data-theme="dark"] .real-chat-card .smart-chat-form .answer-style-select {
         border-radius: 14px !important;
     }
 }
+
+/* ================================
+   Auth Pages
+   ================================ */
+
+.auth-shell {
+    min-height: calc(100vh - 120px);
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.auth-card {
+    width: min(100%, 460px);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.auth-header {
+    margin-bottom: 18px;
+}
+
+.auth-header h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 24px;
+    line-height: 1.25;
+}
+
+.auth-header p {
+    margin: 8px 0 0;
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+.auth-form {
+    display: grid;
+    gap: 10px;
+}
+
+.auth-form label {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.auth-form input {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--card-soft);
+    color: var(--text);
+    border-radius: 14px;
+    padding: 13px;
+    outline: none;
+}
+
+.auth-form input:focus {
+    border-color: rgba(37, 99, 235, 0.55);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.auth-form .primary-btn {
+    margin-top: 8px;
+}
+
+.auth-switch-text {
+    margin: 16px 0 0;
+    color: var(--muted);
+    text-align: center;
+    font-size: 14px;
+}
+
+.auth-switch-text a {
+    color: var(--blue);
+    font-weight: 800;
+    text-decoration: none;
+}
+
+@media (max-width: 700px) {
+    .auth-shell {
+        padding: 12px;
+        place-items: start center;
+    }
+
+    .auth-card {
+        padding: 16px;
+        border-radius: 18px;
+    }
+
+    .auth-header h3 {
+        font-size: 20px;
+    }
+
+    .auth-header p {
+        font-size: 13px;
+    }
+
+    .auth-form input {
+        padding: 11px;
+        border-radius: 12px;
+    }
+}

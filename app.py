@@ -506,6 +506,7 @@ def admin_upload():
 
 
 @app.route("/documents")
+@user_required
 def documents():
     all_documents = Document.query.order_by(Document.created_at.desc()).all()
 
@@ -612,6 +613,7 @@ def delete_document(document_id):
 
 
 @app.route("/chat", methods=["GET", "POST"])
+@user_required
 def chat():
     chat_session = get_or_create_chat_session()
     answer_style = "auto"
@@ -705,6 +707,7 @@ def chat():
 
 
 @app.route("/chat/clear", methods=["POST"])
+@user_required
 def clear_chat():
     chat_session_id = session.get("chat_session_id")
 
@@ -932,6 +935,7 @@ def full_reset():
 
 
 @app.route("/source/<int:chunk_id>")
+@user_required
 def view_source(chunk_id):
     chunk = DocumentChunk.query.get_or_404(chunk_id)
 
@@ -997,6 +1001,7 @@ def read_document(document_id):
 
 
 @app.route("/documents/<int:document_id>/view-original")
+@user_required
 def view_original_document(document_id):
     document = Document.query.get_or_404(document_id)
 
@@ -1141,6 +1146,7 @@ def health_check():
 
 
 @app.route("/cbt", methods=["GET", "POST"])
+@user_required
 def cbt():
     documents = Document.query.order_by(Document.created_at.desc()).all()
 
@@ -1300,6 +1306,7 @@ def cbt():
 
 
 @app.route("/cbt/<int:session_id>")
+@user_required
 def take_cbt(session_id):
     cbt_session = CBTSession.query.get_or_404(session_id)
 
@@ -1373,6 +1380,7 @@ def generate_cbt_bank(document_id):
 
 
 @app.route("/cbt/<int:session_id>/submit", methods=["POST"])
+@user_required
 def submit_cbt(session_id):
     cbt_session = CBTSession.query.get_or_404(session_id)
 
@@ -1413,6 +1421,7 @@ def submit_cbt(session_id):
 
 
 @app.route("/cbt/<int:session_id>/result")
+@user_required
 def cbt_result(session_id):
     cbt_session = CBTSession.query.get_or_404(session_id)
 
@@ -1667,6 +1676,7 @@ def delete_cbt_bank_question(question_id):
 
 
 @app.route("/summaries", methods=["GET", "POST"])
+@user_required
 def summaries():
     documents = Document.query.order_by(Document.created_at.desc()).all()
 
@@ -1729,6 +1739,7 @@ def summaries():
 
 
 @app.route("/summaries/<int:summary_id>")
+@user_required
 def view_summary(summary_id):
     summary = SavedSummary.query.get_or_404(summary_id)
 

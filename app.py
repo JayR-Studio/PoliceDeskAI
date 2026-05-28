@@ -126,6 +126,55 @@ def get_current_user():
     return User.query.get(user_id)
 
 
+def get_current_month_year():
+    now = datetime.utcnow()
+    return now.month, now.year
+
+
+def get_or_create_usage_log(user_id, action_type):
+    month, year = get_current_month_year()
+
+    usage_log = UsageLog.query.filter_by(
+        user_id=user_id,
+        action_type=action_type,
+        month=month,
+        year=year
+    ).first()
+
+    if usage_log:
+        return usage_log
+
+    usage_log = UsageLog(
+        user_id=user_id,
+        action_type=action_type,
+        month=month,
+        year=year,
+        count=0
+    )
+
+    db.session.add(usage_log)
+    db.session.flush()
+
+    return usage_log
+
+
+def record_user_usage(action_type):
+    user_id = session.get("user_id")
+
+    if not user_id:
+        return None
+
+    usage_log = get_or_create_usage_log(
+        user_id=user_id,
+        action_type=action_type
+    )
+
+    usage_log.count += 1
+    db.session.commit()
+
+    return usage_log
+
+
 def user_required(route_function):
     @wraps(route_function)
     def wrapper(*args, **kwargs):
@@ -674,6 +723,8 @@ def chat():
             )
             db.session.add(assistant_message)
             db.session.commit()
+
+            record_user_usage("ai_chat")
 
         except Exception as e:
             db.session.rollback()
@@ -1293,6 +1344,8 @@ def cbt():
         cbt_session.total_questions = total_selected_questions
         db.session.commit()
 
+        record_user_usage("cbt_exam")
+
         flash(f"CBT exam started with {total_selected_questions} questions.", "success")
         return redirect(url_for("take_cbt", session_id=cbt_session.id))
 
@@ -1718,6 +1771,8 @@ def summaries():
 
             db.session.commit()
 
+            record_user_usage("study_note")
+
             flash("Summary generated successfully.", "success")
             return redirect(url_for("view_summary", summary_id=saved_summary.id))
 
@@ -1874,6 +1929,49 @@ def logout():
 
     flash("You have been logged out.", "success")
     return redirect(url_for("login"))
+
+
+@app.route("/usage")
+@user_required
+def usage_dashboard():
+    current_user = get_current_user()
+
+    if not current_user:
+        flash("Please login to continue.", "error")
+        return redirect(url_for("login"))
+
+    month, year = get_current_month_year()
+
+    usage_logs = (
+        UsageLog.query
+        .filter_by(user_id=current_user.id, month=month, year=year)
+        .all()
+    )
+
+    usage_summary = {
+        "ai_chat": 0,
+        "study_note": 0,
+        "cbt_exam": 0
+    }
+
+    for log in usage_logs:
+        usage_summary[log.action_type] = log.count
+
+    active_subscription = (
+        UserSubscription.query
+        .filter_by(user_id=current_user.id)
+        .order_by(UserSubscription.created_at.desc())
+        .first()
+    )
+
+    return render_template(
+        "usage.html",
+        current_user=current_user,
+        usage_summary=usage_summary,
+        month=month,
+        year=year,
+        active_subscription=active_subscription
+    )
 
 
 if __name__ == "__main__":

@@ -41,15 +41,21 @@
             <a href="{{ url_for('chat') }}">Ask Manual</a>
             <a href="{{ url_for('documents') }}">Library</a>
 
+            {% if session.get("user_id") %}
+            <a href="{{ url_for('usage_dashboard') }}">My Usage</a>
+            {% endif %}
+
             {% if session.get("is_admin") %}
             <a href="{{ url_for('admin_upload') }}">Upload Documents</a>
             {% endif %}
         </nav>
+
         {% if session.get("is_admin") %}
         <form method="POST" action="{{ url_for('admin_logout') }}" class="logout-form">
             <button type="submit">Logout Admin</button>
         </form>
         {% endif %}
+
         {% if session.get("user_id") %}
         <form method="POST" action="{{ url_for('logout') }}" class="logout-form">
             <button type="submit">Logout User</button>

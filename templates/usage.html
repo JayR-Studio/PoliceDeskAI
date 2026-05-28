@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block page_title %}My Usage{% endblock %}
+
+{% block content %}
+<section class="usage-shell">
+    <div class="usage-hero">
+        <div>
+            <p class="reader-eyebrow">Account Usage</p>
+            <h3>My PoliceDesk AI Usage</h3>
+            <p>
+                Track your AI questions, study notes, and CBT attempts for this month.
+            </p>
+        </div>
+    </div>
+
+    <div class="usage-grid">
+        <article class="usage-card">
+            <span>AI Chat Questions</span>
+            <strong>{{ usage_summary.ai_chat }}</strong>
+            <p>Questions asked this month.</p>
+        </article>
+
+        <article class="usage-card">
+            <span>Study Notes</span>
+            <strong>{{ usage_summary.study_note }}</strong>
+            <p>Study notes generated this month.</p>
+        </article>
+
+        <article class="usage-card">
+            <span>CBT Exams</span>
+            <strong>{{ usage_summary.cbt_exam }}</strong>
+            <p>CBT exams started this month.</p>
+        </article>
+    </div>
+
+    <section class="usage-card usage-account-card">
+        <div class="usage-account-header">
+            <h4>Account</h4>
+            <p>Your current PoliceDesk AI account details.</p>
+        </div>
+
+        <div class="usage-account-list">
+            <div class="usage-account-row">
+                <span>Name</span>
+                <strong>{{ current_user.full_name }}</strong>
+            </div>
+
+            <div class="usage-account-row">
+                <span>Email</span>
+                <strong>{{ current_user.email }}</strong>
+            </div>
+
+            <div class="usage-account-row">
+                <span>Status</span>
+                <strong>{{ current_user.account_status|title }}</strong>
+            </div>
+
+            <div class="usage-account-row">
+                <span>Usage Period</span>
+                <strong>{{ month }}/{{ year }}</strong>
+            </div>
+
+            <div class="usage-account-row">
+                <span>Plan</span>
+                <strong>
+                    {% if active_subscription %}
+                    {{ active_subscription.plan_name|replace("_", " ")|title }}
+                    {% else %}
+                    No active plan
+                    {% endif %}
+                </strong>
+            </div>
+
+            <div class="usage-account-row">
+                <span>Plan Ends</span>
+                <strong>
+                    {% if active_subscription and active_subscription.expires_at %}
+                    {{ active_subscription.expires_at.strftime("%d %b %Y") }}
+                    {% else %}
+                    Not available
+                    {% endif %}
+                </strong>
+            </div>
+        </div>
+    </section>
+</section>
+{% endblock %}

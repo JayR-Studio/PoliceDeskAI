@@ -4985,3 +4985,218 @@ body[data-theme="dark"] .real-chat-card .smart-chat-form .answer-style-select {
         border-radius: 12px;
     }
 }
+
+/* ================================
+   Usage Dashboard
+   ================================ */
+
+.usage-shell,
+.usage-shell * {
+    box-sizing: border-box;
+}
+
+.usage-shell {
+    display: grid;
+    gap: 18px;
+    width: 100%;
+}
+
+.usage-hero {
+    background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.14), transparent 38%),
+        var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.usage-hero h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 28px;
+    line-height: 1.2;
+}
+
+.usage-hero p {
+    margin: 8px 0 0;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.usage-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.usage-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
+    min-width: 0;
+    overflow-wrap: break-word;
+}
+
+.usage-card span {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.usage-card strong {
+    display: block;
+    margin-top: 8px;
+    color: var(--text);
+    font-size: 34px;
+    line-height: 1;
+}
+
+.usage-card p {
+    margin: 8px 0 0;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.usage-account-card h4 {
+    margin: 0 0 10px;
+    color: var(--text);
+}
+
+@media (max-width: 800px) {
+    .usage-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .usage-hero,
+    .usage-card {
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .usage-hero h3 {
+        font-size: 20px;
+    }
+
+    .usage-card strong {
+        font-size: 28px;
+    }
+}
+
+/* ================================
+   Usage Dashboard Polish
+   ================================ */
+
+.usage-account-card {
+    padding: 18px;
+}
+
+.usage-account-header {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.usage-account-header h4 {
+    margin: 0;
+    color: var(--text);
+    font-size: 18px;
+    line-height: 1.25;
+}
+
+.usage-account-header p {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.usage-account-list {
+    display: grid;
+    gap: 10px;
+}
+
+.usage-account-row {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 11px 12px;
+}
+
+.usage-account-row span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.usage-account-row strong {
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+/* Make My Usage link inherit the same block style if sidebar-link is used */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 62px;
+    padding: 0 22px;
+    border-radius: 20px;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 850;
+    border: 1px solid var(--border);
+    background: var(--card-soft);
+}
+
+.sidebar-link:hover {
+    border-color: rgba(56, 189, 248, 0.35);
+    background: rgba(37, 99, 235, 0.10);
+}
+
+@media (max-width: 700px) {
+    .usage-account-card {
+        padding: 12px;
+    }
+
+    .usage-account-header h4 {
+        font-size: 16px;
+    }
+
+    .usage-account-header p {
+        font-size: 12px;
+    }
+
+    .usage-account-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+        padding: 10px;
+        border-radius: 12px;
+    }
+
+    .usage-account-row span {
+        font-size: 10.5px;
+    }
+
+    .usage-account-row strong {
+        font-size: 12.5px;
+    }
+
+    .sidebar-link {
+        min-height: 56px;
+        padding: 0 20px;
+        border-radius: 18px;
+    }
+}

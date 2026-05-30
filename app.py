@@ -125,7 +125,15 @@ def user_can_perform_action(action_type):
     )
 
     if usage_log.count >= allowed_limit:
-        return False, f"You have reached your {action_type.replace('_', ' ')} limit for your current plan."
+        friendly_action_names = {
+            "ai_chat": "AI chat questions",
+            "study_note": "study notes",
+            "cbt_exam": "CBT exams"
+        }
+
+        friendly_name = friendly_action_names.get(action_type, action_type.replace("_", " "))
+
+        return False, f"You have reached your monthly limit for {friendly_name}. Please upgrade your plan to continue."
 
     return True, "Allowed"
 

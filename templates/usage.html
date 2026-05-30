@@ -15,33 +15,77 @@
     </div>
 
     <div class="usage-grid">
-        <article class="usage-card">
-            <span>AI Chat Questions</span>
-            <strong>{{ usage_summary.ai_chat }}/{{ plan_limits.ai_chat }}</strong>
-            <p>Questions asked this month.</p>
-        </article>
+        <article class="usage-card usage-meter-card">
+            <div class="usage-card-top">
+                <span>AI Chat Questions</span>
+                <strong>{{ usage_summary.ai_chat }} / {{ plan_limits.ai_chat }}</strong>
+            </div>
 
-        <article class="usage-card">
-            <span>Study Notes</span>
-            <strong>{{ usage_summary.study_note }}/{{ plan_limits.study_note }}</strong>
-            <p>Study notes generated this month.</p>
-        </article>
+            {% set ai_percent = (usage_summary.ai_chat / plan_limits.ai_chat * 100) if plan_limits.ai_chat else 0 %}
 
-        <article class="usage-card">
-            <span>CBT Exams</span>
-            {% if plan_limits.cbt_exam > 9999 %}
-            <strong>{{ usage_summary.cbt_exam }} / Unlimited</strong>
-            {% else %}
-            <strong>{{ usage_summary.cbt_exam }} / {{ plan_limits.cbt_exam }}</strong>
+            <div class="usage-progress-track">
+                <div class="usage-progress-fill" style="width: {{ ai_percent if ai_percent <= 100 else 100 }}%;"></div>
+            </div>
+
+            <p>AI questions used this month.</p>
+
+            {% if usage_summary.ai_chat >= plan_limits.ai_chat %}
+            <em class="usage-limit-note">Limit reached</em>
             {% endif %}
+        </article>
+
+        <article class="usage-card usage-meter-card">
+            <div class="usage-card-top">
+                <span>Study Notes</span>
+                <strong>{{ usage_summary.study_note }} / {{ plan_limits.study_note }}</strong>
+            </div>
+
+            {% set summary_percent = (usage_summary.study_note / plan_limits.study_note * 100) if plan_limits.study_note
+            else 0 %}
+
+            <div class="usage-progress-track">
+                <div class="usage-progress-fill"
+                     style="width: {{ summary_percent if summary_percent <= 100 else 100 }}%;"></div>
+            </div>
+
+            <p>Study notes generated this month.</p>
+
+            {% if usage_summary.study_note >= plan_limits.study_note %}
+            <em class="usage-limit-note">Limit reached</em>
+            {% endif %}
+        </article>
+
+        <article class="usage-card usage-meter-card">
+            <div class="usage-card-top">
+                <span>CBT Exams</span>
+
+                {% if plan_limits.cbt_exam > 9999 %}
+                <strong>{{ usage_summary.cbt_exam }} / Unlimited</strong>
+                {% else %}
+                <strong>{{ usage_summary.cbt_exam }} / {{ plan_limits.cbt_exam }}</strong>
+                {% endif %}
+            </div>
+
+            {% if plan_limits.cbt_exam > 9999 %}
+            <div class="usage-progress-track unlimited-track">
+                <div class="usage-progress-fill unlimited-fill" style="width: 100%;"></div>
+            </div>
+            {% else %}
+            {% set cbt_percent = (usage_summary.cbt_exam / plan_limits.cbt_exam * 100) if plan_limits.cbt_exam else 0 %}
+            <div class="usage-progress-track">
+                <div class="usage-progress-fill"
+                     style="width: {{ cbt_percent if cbt_percent <= 100 else 100 }}%;"></div>
+            </div>
+            {% endif %}
+
             <p>CBT exams started this month.</p>
         </article>
     </div>
 
     <section class="usage-card usage-account-card">
         <div class="usage-account-header">
-            <h4>Account</h4>
-            <p>Your current PoliceDesk AI account details.</p>
+            <h4>Account & Plan</h4>
+            <p>Your current PoliceDesk AI account and subscription details.</p>
         </div>
 
         <div class="usage-account-list">
@@ -61,11 +105,6 @@
             </div>
 
             <div class="usage-account-row">
-                <span>Usage Period</span>
-                <strong>{{ month }}/{{ year }}</strong>
-            </div>
-
-            <div class="usage-account-row">
                 <span>Plan</span>
                 <strong>
                     {% if active_subscription %}
@@ -74,6 +113,11 @@
                     No active plan
                     {% endif %}
                 </strong>
+            </div>
+
+            <div class="usage-account-row">
+                <span>Usage Period</span>
+                <strong>{{ month }}/{{ year }}</strong>
             </div>
 
             <div class="usage-account-row">
@@ -88,10 +132,65 @@
             </div>
         </div>
     </section>
-    {% if active_subscription and active_subscription.expires_at and active_subscription.expires_at < now %}
-    <div class="usage-warning-box">
-        Your subscription has expired. Please renew to continue using AI features.
-    </div>
-    {% endif %}
-</section>
-{% endblock %}
+    <section class="usage-upgrade-card">
+        <div>
+            <p class="reader-eyebrow">Upgrade Access</p>
+            <h4>Need more AI questions?</h4>
+            <p>
+                Upgrade your plan to get more monthly AI questions, more study notes,
+                and continued access to PoliceDesk AI tools.
+            </p>
+        </div>
+
+        <div class="usage-plan-list">
+            <div class="usage-plan-pill">
+                <div class="usage-plan-pill-header">
+                    <strong>Basic</strong>
+                    <span>₦10,000/year</span>
+                </div>
+
+                <ul>
+                    <li>50 AI chat questions/month</li>
+                    <li>3 study notes/month</li>
+                    <li>Unlimited CBT practice</li>
+                    <li>Unlimited document library access</li>
+                    <li>Source references included</li>
+                </ul>
+            </div>
+
+            <div class="usage-plan-pill featured-plan-pill">
+                <div class="usage-plan-pill-header">
+                    <strong>Standard</strong>
+                    <span>₦20,000/year</span>
+                </div>
+
+                <ul>
+                    <li>150 AI chat questions/month</li>
+                    <li>10 study notes/month</li>
+                    <li>Unlimited CBT practice</li>
+                    <li>Unlimited document library access</li>
+                    <li>Score history and study recommendations</li>
+                </ul>
+            </div>
+
+            <div class="usage-plan-pill">
+                <div class="usage-plan-pill-header">
+                    <strong>Premium</strong>
+                    <span>₦30,000/year</span>
+                </div>
+
+                <ul>
+                    <li>300 AI chat questions/month</li>
+                    <li>20 study notes/month</li>
+                    <li>Unlimited CBT practice</li>
+                    <li>Unlimited document library access</li>
+                    <li>Priority access to new features</li>
+                </ul>
+            </div>
+        </div>
+
+        <a href="#" class="primary-btn usage-upgrade-btn">
+            Contact Admin to Upgrade
+        </a>
+    </section>
+    {% endblock %}

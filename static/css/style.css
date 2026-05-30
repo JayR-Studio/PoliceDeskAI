@@ -5211,3 +5211,261 @@ body[data-theme="dark"] .real-chat-card .smart-chat-form .answer-style-select {
     border-radius: 14px;
     font-weight: 800;
 }
+
+/* ================================
+   Usage Dashboard Day 11 Polish
+   ================================ */
+
+.usage-meter-card {
+    display: grid;
+    gap: 12px;
+}
+
+.usage-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.usage-card-top span {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 850;
+    line-height: 1.35;
+}
+
+.usage-card-top strong {
+    margin: 0;
+    color: var(--text);
+    font-size: 24px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.usage-progress-track {
+    width: 100%;
+    height: 9px;
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.usage-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #2563eb, #38bdf8);
+    transition: width 0.25s ease;
+}
+
+.unlimited-track {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.24);
+}
+
+.unlimited-fill {
+    background: linear-gradient(135deg, #059669, #34d399);
+}
+
+.usage-limit-note {
+    width: fit-content;
+    display: inline-flex;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: rgba(239, 68, 68, 0.10);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: var(--error);
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 850;
+}
+
+.usage-upgrade-card {
+    background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.14), transparent 38%),
+        var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    gap: 16px;
+}
+
+.usage-upgrade-card h4 {
+    margin: 0;
+    color: var(--text);
+    font-size: 22px;
+    line-height: 1.25;
+}
+
+.usage-upgrade-card p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.usage-plan-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.usage-plan-pill {
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px;
+    display: grid;
+    gap: 4px;
+}
+
+.usage-plan-pill strong {
+    color: var(--text);
+    font-size: 14px;
+}
+
+.usage-plan-pill span {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.usage-upgrade-btn {
+    width: fit-content;
+}
+
+@media (max-width: 800px) {
+    .usage-card-top {
+        align-items: center;
+    }
+
+    .usage-card-top strong {
+        font-size: 20px;
+    }
+
+    .usage-plan-list {
+        grid-template-columns: 1fr;
+    }
+
+    .usage-upgrade-card {
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .usage-upgrade-card h4 {
+        font-size: 18px;
+    }
+
+    .usage-upgrade-card p {
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .usage-upgrade-btn {
+        width: 100%;
+    }
+}
+
+/* ================================
+   Usage Plan Package Cards
+   ================================ */
+
+.usage-plan-pill {
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 14px;
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+    overflow-wrap: break-word;
+}
+
+.featured-plan-pill {
+    border-color: rgba(56, 189, 248, 0.35);
+    background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 35%),
+        var(--card-soft);
+}
+
+.usage-plan-pill-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.usage-plan-pill-header strong {
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.25;
+}
+
+.usage-plan-pill-header span {
+    color: var(--blue);
+    font-size: 12px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.usage-plan-pill ul {
+    margin: 0;
+    padding-left: 17px;
+    display: grid;
+    gap: 7px;
+}
+
+.usage-plan-pill li {
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.45;
+}
+
+@media (max-width: 800px) {
+    .usage-plan-pill {
+        padding: 12px;
+        border-radius: 15px;
+    }
+
+    .usage-plan-pill-header {
+        display: grid;
+        gap: 4px;
+    }
+
+    .usage-plan-pill-header strong {
+        font-size: 14px;
+    }
+
+    .usage-plan-pill-header span {
+        font-size: 11.5px;
+    }
+
+    .usage-plan-pill li {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 800px) {
+    .sidebar nav {
+        display: grid;
+        gap: 8px;
+    }
+
+    .sidebar nav a {
+        min-height: 48px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        font-size: 13px;
+    }
+
+    .logout-form button {
+        min-height: 44px;
+        font-size: 13px;
+        border-radius: 14px;
+    }
+}

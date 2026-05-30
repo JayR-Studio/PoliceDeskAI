@@ -48,6 +48,11 @@
             {% if session.get("is_admin") %}
             <a href="{{ url_for('admin_upload') }}">Upload Documents</a>
             {% endif %}
+
+            {% if not session.get("user_id") %}
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('register') }}">Register</a>
+            {% endif %}
         </nav>
 
         {% if session.get("is_admin") %}
@@ -60,9 +65,6 @@
         <form method="POST" action="{{ url_for('logout') }}" class="logout-form">
             <button type="submit">Logout User</button>
         </form>
-        {% else %}
-        <a href="{{ url_for('login') }}">Login</a>
-        <a href="{{ url_for('register') }}">Register</a>
         {% endif %}
 
         <div class="sidebar-note">

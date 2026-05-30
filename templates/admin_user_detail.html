@@ -48,9 +48,9 @@
                     <span>Last Login</span>
                     <strong>
                         {% if user.last_login %}
-                            {{ user.last_login.strftime("%d %b %Y, %I:%M %p") }}
+                        {{ user.last_login.strftime("%d %b %Y, %I:%M %p") }}
                         {% else %}
-                            Never
+                        Never
                         {% endif %}
                     </strong>
                 </div>
@@ -63,25 +63,34 @@
                 <p>Usage for {{ month }}/{{ year }}.</p>
             </div>
 
-            <div class="usage-grid admin-detail-usage-grid">
-                <article class="usage-card">
-                    <span>AI Chat</span>
-                    <strong>{{ usage_summary.ai_chat }}</strong>
-                    <p>Questions used.</p>
-                </article>
+            <section class="admin-usage-banner">
+                <div class="admin-usage-banner-head">
+                    <div>
+                        <h4>Current Usage</h4>
+                        <p>Usage for {{ month }}/{{ year }}</p>
+                    </div>
+                </div>
 
-                <article class="usage-card">
-                    <span>Study Notes</span>
-                    <strong>{{ usage_summary.study_note }}</strong>
-                    <p>Notes generated.</p>
-                </article>
+                <div class="admin-usage-banner-grid">
+                    <div class="admin-usage-mini-stat">
+                        <span>AI Chat</span>
+                        <strong>{{ usage_summary.ai_chat }}</strong>
+                        <small>Questions</small>
+                    </div>
 
-                <article class="usage-card">
-                    <span>CBT Exams</span>
-                    <strong>{{ usage_summary.cbt_exam }}</strong>
-                    <p>Exams started.</p>
-                </article>
-            </div>
+                    <div class="admin-usage-mini-stat">
+                        <span>Study Notes</span>
+                        <strong>{{ usage_summary.study_note }}</strong>
+                        <small>Generated</small>
+                    </div>
+
+                    <div class="admin-usage-mini-stat">
+                        <span>CBT Exams</span>
+                        <strong>{{ usage_summary.cbt_exam }}</strong>
+                        <small>Started</small>
+                    </div>
+                </div>
+            </section>
         </section>
     </div>
 
@@ -92,24 +101,31 @@
                 <p>Assign a new plan after confirming payment.</p>
             </div>
 
-            <form 
-                method="POST" 
-                action="{{ url_for('update_user_subscription', user_id=user.id) }}"
-                class="admin-user-form"
+            <form
+                    method="POST"
+                    action="{{ url_for('update_user_subscription', user_id=user.id) }}"
+                    class="admin-user-form"
             >
                 <label>Plan</label>
                 <select name="plan_name">
-                    <option value="free_trial" {% if latest_subscription and latest_subscription.plan_name == "free_trial" %}selected{% endif %}>Free Trial</option>
-                    <option value="basic" {% if latest_subscription and latest_subscription.plan_name == "basic" %}selected{% endif %}>Basic</option>
-                    <option value="standard" {% if latest_subscription and latest_subscription.plan_name == "standard" %}selected{% endif %}>Standard</option>
-                    <option value="premium" {% if latest_subscription and latest_subscription.plan_name == "premium" %}selected{% endif %}>Premium</option>
+                    <option value="free_trial" {% if latest_subscription and latest_subscription.plan_name==
+                    "free_trial" %}selected{% endif %}>Free Trial</option>
+                    <option value="basic" {% if latest_subscription and latest_subscription.plan_name==
+                    "basic" %}selected{% endif %}>Basic</option>
+                    <option value="standard" {% if latest_subscription and latest_subscription.plan_name==
+                    "standard" %}selected{% endif %}>Standard</option>
+                    <option value="premium" {% if latest_subscription and latest_subscription.plan_name==
+                    "premium" %}selected{% endif %}>Premium</option>
                 </select>
 
                 <label>Payment Status</label>
                 <select name="payment_status">
-                    <option value="pending" {% if latest_subscription and latest_subscription.payment_status == "pending" %}selected{% endif %}>Pending</option>
-                    <option value="active" {% if latest_subscription and latest_subscription.payment_status == "active" %}selected{% endif %}>Active</option>
-                    <option value="expired" {% if latest_subscription and latest_subscription.payment_status == "expired" %}selected{% endif %}>Expired</option>
+                    <option value="pending" {% if latest_subscription and latest_subscription.payment_status==
+                    "pending" %}selected{% endif %}>Pending</option>
+                    <option value="active" {% if latest_subscription and latest_subscription.payment_status==
+                    "active" %}selected{% endif %}>Active</option>
+                    <option value="expired" {% if latest_subscription and latest_subscription.payment_status==
+                    "expired" %}selected{% endif %}>Expired</option>
                 </select>
 
                 <button type="submit" class="primary-btn">
@@ -124,18 +140,23 @@
                 <p>Suspend, reactivate, or expire user access.</p>
             </div>
 
-            <form 
-                method="POST" 
-                action="{{ url_for('update_user_status', user_id=user.id) }}"
-                class="admin-user-form"
+            <form
+                    method="POST"
+                    action="{{ url_for('update_user_status', user_id=user.id) }}"
+                    class="admin-user-form"
             >
                 <label>Account Status</label>
                 <select name="account_status">
-                    <option value="trial" {% if user.account_status == "trial" %}selected{% endif %}>Trial</option>
-                    <option value="active" {% if user.account_status == "active" %}selected{% endif %}>Active</option>
-                    <option value="pending" {% if user.account_status == "pending" %}selected{% endif %}>Pending</option>
-                    <option value="expired" {% if user.account_status == "expired" %}selected{% endif %}>Expired</option>
-                    <option value="suspended" {% if user.account_status == "suspended" %}selected{% endif %}>Suspended</option>
+                    <option value="trial" {% if user.account_status==
+                    "trial" %}selected{% endif %}>Trial</option>
+                    <option value="active" {% if user.account_status==
+                    "active" %}selected{% endif %}>Active</option>
+                    <option value="pending" {% if user.account_status==
+                    "pending" %}selected{% endif %}>Pending</option>
+                    <option value="expired" {% if user.account_status==
+                    "expired" %}selected{% endif %}>Expired</option>
+                    <option value="suspended" {% if user.account_status==
+                    "suspended" %}selected{% endif %}>Suspended</option>
                 </select>
 
                 <button type="submit" class="secondary-btn">
@@ -152,33 +173,33 @@
         </div>
 
         {% if subscriptions %}
-            <div class="subscription-history-list">
-                {% for subscription in subscriptions %}
-                    <div class="subscription-history-item">
-                        <strong>{{ subscription.plan_name|replace("_", " ")|title }}</strong>
-                        <span>{{ subscription.payment_status|title }}</span>
-                        <p>
-                            ₦{{ "{:,}".format(subscription.amount_paid or 0) }}
-                            • Started:
-                            {% if subscription.starts_at %}
-                                {{ subscription.starts_at.strftime("%d %b %Y") }}
-                            {% else %}
-                                Not available
-                            {% endif %}
-                            • Ends:
-                            {% if subscription.expires_at %}
-                                {{ subscription.expires_at.strftime("%d %b %Y") }}
-                            {% else %}
-                                Not available
-                            {% endif %}
-                        </p>
-                    </div>
-                {% endfor %}
+        <div class="subscription-history-list">
+            {% for subscription in subscriptions %}
+            <div class="subscription-history-item">
+                <strong>{{ subscription.plan_name|replace("_", " ")|title }}</strong>
+                <span>{{ subscription.payment_status|title }}</span>
+                <p>
+                    ₦{{ "{:,}".format(subscription.amount_paid or 0) }}
+                    • Started:
+                    {% if subscription.starts_at %}
+                    {{ subscription.starts_at.strftime("%d %b %Y") }}
+                    {% else %}
+                    Not available
+                    {% endif %}
+                    • Ends:
+                    {% if subscription.expires_at %}
+                    {{ subscription.expires_at.strftime("%d %b %Y") }}
+                    {% else %}
+                    Not available
+                    {% endif %}
+                </p>
             </div>
+            {% endfor %}
+        </div>
         {% else %}
-            <div class="empty-mini-state">
-                <p>No subscription history found.</p>
-            </div>
+        <div class="empty-mini-state">
+            <p>No subscription history found.</p>
+        </div>
         {% endif %}
     </section>
 </section>

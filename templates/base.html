@@ -22,6 +22,25 @@
 <body class="{% block body_class %}{% endblock %}">
 
 <div class="app-shell">
+    <header class="mobile-app-header">
+        <button type="button" class="mobile-menu-btn" id="mobileMenuBtn">
+            ☰
+        </button>
+
+        <div class="mobile-app-title">
+            <strong>PoliceDesk AI</strong>
+            <span>{% block mobile_page_title %}{% block page_title_mobile %}{% endblock %}{% endblock %}</span>
+        </div>
+
+        <div class="mobile-header-logo">
+            <img
+                    src="{{ url_for('static', filename='icons/icon-192.png') }}"
+                    alt="PoliceDesk AI"
+            >
+        </div>
+    </header>
+
+    <div class="mobile-sidebar-backdrop" id="mobileSidebarBackdrop"></div>
     <aside class="sidebar">
         <div class="brand">
             <div class="brand-icon brand-logo-icon">
@@ -104,6 +123,39 @@
 </div>
 
 <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
+<script>
+    const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+    const mobileSidebarBackdrop = document.getElementById("mobileSidebarBackdrop");
+    const sidebar = document.querySelector(".sidebar");
+
+    function openMobileSidebar() {
+        if (sidebar) {
+            sidebar.classList.add("mobile-sidebar-open");
+        }
+
+        if (mobileSidebarBackdrop) {
+            mobileSidebarBackdrop.classList.add("active");
+        }
+    }
+
+    function closeMobileSidebar() {
+        if (sidebar) {
+            sidebar.classList.remove("mobile-sidebar-open");
+        }
+
+        if (mobileSidebarBackdrop) {
+            mobileSidebarBackdrop.classList.remove("active");
+        }
+    }
+
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener("click", openMobileSidebar);
+    }
+
+    if (mobileSidebarBackdrop) {
+        mobileSidebarBackdrop.addEventListener("click", closeMobileSidebar);
+    }
+</script>
 <script>
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {

@@ -87,16 +87,12 @@
             <div class="message-bubble assistant-bubble">
                 <strong>PoliceDesk AI</strong>
                 <div
-                        class="assistant-answer {% if loop.last %}typewriter-answer{% endif %}"
-                        {% if loop.last %}
+                        class="assistant-answer {% if typewriter_message_id and message.id == typewriter_message_id %}typewriter-answer{% endif %}"
+                        {% if typewriter_message_id and message.id== typewriter_message_id %}
                         data-full-answer="{{ message.content | e }}"
                         {% endif %}
                 >
-                    {% if loop.last %}
                     {{ message.content }}
-                    {% else %}
-                    {{ message.content }}
-                    {% endif %}
                 </div>
 
                 {% if message.sources_json %}
@@ -169,7 +165,7 @@
                 id="chatInput"
                 placeholder="Ask from the uploaded police documents..."
                 required
-        > </textarea>
+        ></textarea>
 
         <select name="answer_style" class="answer-style-select">
             <option value="auto" selected>Auto Style</option>
@@ -323,5 +319,29 @@
     if (chatSidebarBackdrop) {
         chatSidebarBackdrop.addEventListener("click", closeChatSidebar);
     }
+</script>
+<script>
+    const presetButtons = document.querySelectorAll(".preset-btn");
+    const answerStyleSelect = document.querySelector(".answer-style-select");
+
+    presetButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            const promptText = button.dataset.prompt || "";
+            const style = button.dataset.style || "auto";
+
+            if (chatInput) {
+                chatInput.value = promptText;
+                chatInput.focus();
+
+                if (typeof autoResizeChatInput === "function") {
+                    autoResizeChatInput();
+                }
+            }
+
+            if (answerStyleSelect) {
+                answerStyleSelect.value = style;
+            }
+        });
+    });
 </script>
 {% endblock %}

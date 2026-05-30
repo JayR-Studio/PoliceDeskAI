@@ -47,6 +47,7 @@
 
             {% if session.get("is_admin") %}
             <a href="{{ url_for('admin_upload') }}">Upload Documents</a>
+            <a href="{{ url_for('admin_users') }}">Manage Users</a>
             {% endif %}
 
             {% if not session.get("user_id") %}

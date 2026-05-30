@@ -82,6 +82,21 @@ PLAN_LIMITS = {
 }
 
 
+PLAN_PRICES = {
+    "free_trial": 0,
+    "basic": 10000,
+    "standard": 20000,
+    "premium": 30000
+}
+
+
+def get_plan_duration_days(plan_name):
+    if plan_name == "free_trial":
+        return 7
+
+    return 365
+
+
 def get_active_subscription(user):
     if not user:
         return None
@@ -105,12 +120,20 @@ def user_can_perform_action(action_type):
     if current_user.account_status == "suspended":
         return False, "Your account has been suspended. Please contact admin."
 
+    if current_user.account_status == "expired":
+        return False, "Your account has expired. Please renew your plan to continue."
+
+    if current_user.account_status == "pending":
+        return False, "Your account is pending approval. Please contact admin."
+
     active_subscription = get_active_subscription(current_user)
 
     if not active_subscription:
         return False, "No active subscription found. Please contact admin."
 
     if active_subscription.expires_at and active_subscription.expires_at < datetime.now():
+        current_user.account_status = "expired"
+        db.session.commit()
         return False, "Your subscription has expired. Please renew your plan."
 
     plan_name = active_subscription.plan_name or "free_trial"
@@ -777,7 +800,6 @@ def chat():
     chat_session = get_or_create_chat_session()
     answer_style = "auto"
     latest_results = []
-    rag_answer = None
 
     if request.method == "POST":
         query = request.form.get("query", "").strip()
@@ -799,6 +821,7 @@ def chat():
             content=query,
             answer_style=answer_style
         )
+
         db.session.add(user_message)
         db.session.commit()
 
@@ -806,9 +829,13 @@ def chat():
             latest_results = semantic_search(query, limit=5)
 
             if not latest_results:
-                assistant_text = ("I could not find relevant information in the uploaded police documents."
-                                  " You may need to upload or generate embeddings for the right document.")
+                assistant_text = (
+                    "I could not find relevant information in the uploaded police documents. "
+                    "You may need to upload the right document or generate embeddings for it."
+                )
                 sources = []
+                should_record_usage = False
+
             else:
                 recent_history = (
                     ChatMessage.query
@@ -829,6 +856,7 @@ def chat():
 
                 assistant_text = clean_ai_answer_for_users(rag_answer["answer"])
                 sources = rag_answer["sources"]
+                should_record_usage = True
 
             assistant_message = ChatMessage(
                 session_id=chat_session.id,
@@ -837,10 +865,14 @@ def chat():
                 answer_style=answer_style,
                 sources_json=json.dumps(sources)
             )
+
             db.session.add(assistant_message)
             db.session.commit()
 
-            record_user_usage("ai_chat")
+            session["typewriter_message_id"] = assistant_message.id
+
+            if should_record_usage:
+                record_user_usage("ai_chat")
 
         except Exception as e:
             db.session.rollback()
@@ -851,6 +883,7 @@ def chat():
                 content=f"AI answer failed: {str(e)}",
                 answer_style=answer_style
             )
+
             db.session.add(error_message)
             db.session.commit()
 
@@ -865,11 +898,14 @@ def chat():
         .all()
     )
 
+    typewriter_message_id = session.pop("typewriter_message_id", None)
+
     return render_template(
         "chat.html",
         messages=messages,
         answer_style=answer_style,
-        latest_results=latest_results
+        latest_results=latest_results,
+        typewriter_message_id=typewriter_message_id
     )
 
 
@@ -2082,6 +2118,143 @@ def usage_dashboard():
         active_subscription=active_subscription,
         now=datetime.now()
     )
+
+
+# --------------------------------------------------------------------------------------------------------------
+#                                    ADMIN PAYMENT FEATURES
+# ---------------------------------------------------------------------------------------------------------------
+
+
+@app.route("/admin/users")
+@admin_required
+def admin_users():
+    users = User.query.order_by(User.created_at.desc()).all()
+
+    user_subscriptions = {}
+
+    for user in users:
+        latest_subscription = (
+            UserSubscription.query
+            .filter_by(user_id=user.id)
+            .order_by(UserSubscription.created_at.desc())
+            .first()
+        )
+
+        user_subscriptions[user.id] = latest_subscription
+
+    return render_template(
+        "admin_users.html",
+        users=users,
+        user_subscriptions=user_subscriptions
+    )
+
+
+@app.route("/admin/users/<int:user_id>")
+@admin_required
+def admin_user_detail(user_id):
+    user = User.query.get_or_404(user_id)
+
+    subscriptions = (
+        UserSubscription.query
+        .filter_by(user_id=user.id)
+        .order_by(UserSubscription.created_at.desc())
+        .all()
+    )
+
+    latest_subscription = subscriptions[0] if subscriptions else None
+
+    month, year = get_current_month_year()
+
+    usage_logs = (
+        UsageLog.query
+        .filter_by(user_id=user.id, month=month, year=year)
+        .all()
+    )
+
+    usage_summary = {
+        "ai_chat": 0,
+        "study_note": 0,
+        "cbt_exam": 0
+    }
+
+    for log in usage_logs:
+        usage_summary[log.action_type] = log.count
+
+    return render_template(
+        "admin_user_detail.html",
+        user=user,
+        subscriptions=subscriptions,
+        latest_subscription=latest_subscription,
+        usage_summary=usage_summary,
+        month=month,
+        year=year
+    )
+
+
+@app.route("/admin/users/<int:user_id>/subscription", methods=["POST"])
+@admin_required
+def update_user_subscription(user_id):
+    user = User.query.get_or_404(user_id)
+
+    plan_name = request.form.get("plan_name", "free_trial").strip()
+    payment_status = request.form.get("payment_status", "active").strip()
+
+    allowed_plans = ["free_trial", "basic", "standard", "premium"]
+    allowed_statuses = ["pending", "active", "expired"]
+
+    if plan_name not in allowed_plans:
+        flash("Invalid plan selected.", "error")
+        return redirect(url_for("admin_users"))
+
+    if payment_status not in allowed_statuses:
+        flash("Invalid payment status selected.", "error")
+        return redirect(url_for("admin_users"))
+
+    duration_days = get_plan_duration_days(plan_name)
+
+    new_subscription = UserSubscription(
+        user_id=user.id,
+        plan_name=plan_name,
+        payment_status=payment_status,
+        amount_paid=PLAN_PRICES.get(plan_name, 0),
+        currency="NGN",
+        starts_at=datetime.utcnow(),
+        expires_at=datetime.utcnow() + timedelta(days=duration_days)
+    )
+
+    db.session.add(new_subscription)
+
+    if payment_status == "active":
+        user.account_status = "active"
+    elif payment_status == "expired":
+        user.account_status = "expired"
+    else:
+        user.account_status = "pending"
+
+    db.session.commit()
+
+    flash(f"{user.full_name}'s subscription has been updated.", "success")
+    return redirect(url_for("admin_users"))
+
+
+@app.route("/admin/users/<int:user_id>/status", methods=["POST"])
+@admin_required
+def update_user_status(user_id):
+    user = User.query.get_or_404(user_id)
+
+    new_status = request.form.get("account_status", "").strip()
+
+    allowed_statuses = ["trial", "active", "pending", "expired", "suspended"]
+
+    if new_status not in allowed_statuses:
+        flash("Invalid account status.", "error")
+        return redirect(url_for("admin_users"))
+
+    user.account_status = new_status
+    db.session.commit()
+
+    flash(f"{user.full_name}'s account status has been updated.", "success")
+    return redirect(url_for("admin_users"))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block page_title %}Manage Users{% endblock %}
+
+{% block content %}
+<section class="admin-users-shell">
+    <div class="usage-hero">
+        <div>
+            <p class="reader-eyebrow">Admin Control</p>
+            <h3>User Accounts</h3>
+            <p>
+                View registered officers and manage their subscription access.
+            </p>
+        </div>
+    </div>
+
+    {% if users %}
+        <div class="admin-users-table-card">
+            <div class="admin-users-table-header">
+                <span>User</span>
+                <span>Plan</span>
+                <span>Status</span>
+                <span>Expires</span>
+                <span>Action</span>
+            </div>
+
+            <div class="admin-users-table-body">
+                {% for user in users %}
+                    {% set subscription = user_subscriptions.get(user.id) %}
+
+                    <div class="admin-user-row">
+                        <div class="admin-user-cell user-main-cell">
+                            <strong>{{ user.full_name }}</strong>
+                            <small>{{ user.email }}</small>
+                        </div>
+
+                        <div class="admin-user-cell">
+                            {% if subscription %}
+                                {{ subscription.plan_name|replace("_", " ")|title }}
+                            {% else %}
+                                No Plan
+                            {% endif %}
+                        </div>
+
+                        <div class="admin-user-cell">
+                            <span class="user-status-pill status-{{ user.account_status }}">
+                                {{ user.account_status|title }}
+                            </span>
+                        </div>
+
+                        <div class="admin-user-cell">
+                            {% if subscription and subscription.expires_at %}
+                                {{ subscription.expires_at.strftime("%d %b %Y") }}
+                            {% else %}
+                                Not Available
+                            {% endif %}
+                        </div>
+
+                        <div class="admin-user-cell">
+                            <a href="{{ url_for('admin_user_detail', user_id=user.id) }}" class="small-action-btn primary-action">
+                                Manage
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-mini-state">
+            <p>No registered users yet.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

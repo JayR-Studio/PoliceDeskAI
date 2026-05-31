@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block page_title %}Contact Developer{% endblock %}
+
+{% block content %}
+<section class="upgrade-shell">
+    <div class="usage-hero">
+        <div>
+            <p class="reader-eyebrow">Support</p>
+            <h3>Contact the Developer</h3>
+            <p>
+                Report issues, suggest improvements, or send complaints about PoliceDesk AI.
+            </p>
+        </div>
+    </div>
+
+    <section class="upgrade-card">
+        <div class="usage-account-header">
+            <h4>Send a Message</h4>
+            <p>Describe the issue clearly so it can be fixed faster.</p>
+        </div>
+
+        <form method="POST" class="upgrade-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <label for="subject">Subject</label>
+            <input
+                type="text"
+                name="subject"
+                id="subject"
+                placeholder="Example: AI answer issue, payment issue, CBT problem"
+                required
+            >
+
+            <label for="message">Message</label>
+            <textarea
+                name="message"
+                id="message"
+                rows="5"
+                placeholder="Explain what happened..."
+                required
+            ></textarea>
+
+            <button type="submit" class="primary-btn">
+                Send Message
+            </button>
+        </form>
+    </section>
+</section>
+{% endblock %}

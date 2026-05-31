@@ -77,7 +77,11 @@
                         data-full-answer="{{ message.content | e }}"
                         {% endif %}
                 >
+                    {% if typewriter_message_id and message.id == typewriter_message_id %}
                     {{ message.content }}
+                    {% else %}
+                    {{ message.content | safe_markdown }}
+                    {% endif %}
                 </div>
 
                 {% if message.sources_json %}
@@ -251,6 +255,19 @@
                 .replaceAll("'", "&#039;");
         }
 
+        function simpleMarkdownToHtml(text) {
+            let safeText = escapeHtml(text);
+
+            safeText = safeText.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+            safeText = safeText.replace(/__(.*?)__/g, "<strong>$1</strong>");
+            safeText = safeText.replace(/^###\s+(.*)$/gm, "<strong>$1</strong>");
+            safeText = safeText.replace(/^##\s+(.*)$/gm, "<strong>$1</strong>");
+            safeText = safeText.replace(/^#\s+(.*)$/gm, "<strong>$1</strong>");
+            safeText = safeText.replace(/\n/g, "<br>");
+
+            return safeText;
+        }
+
         function typeAnswer() {
             if (index <= fullAnswer.length) {
                 const visibleText = fullAnswer.slice(0, index);
@@ -259,6 +276,7 @@
 
                 setTimeout(typeAnswer, speed);
             } else {
+                latestAnswer.innerHTML = simpleMarkdownToHtml(fullAnswer);
                 latestAnswer.classList.add("done-typing");
             }
         }

@@ -2,6 +2,9 @@ import os
 import json
 import uuid
 import re
+import markdown
+import bleach
+from markupsafe import Markup
 from functools import wraps
 from dotenv import load_dotenv
 
@@ -23,7 +26,7 @@ from flask_wtf.csrf import CSRFProtect
 from werkzeug.utils import secure_filename
 from config import Config
 from models import (db, Document, DocumentChunk, ChatSession, ChatMessage, CBTSession, CBTQuestion, CBTQuestionBank,
-                    SavedSummary, User, UserSubscription, UsageLog, UpgradeRequest)
+                    SavedSummary, User, UserSubscription, UsageLog, UpgradeRequest, SupportMessage)
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime, timedelta
@@ -38,6 +41,33 @@ csrf = CSRFProtect(app)
 
 if app.config["FLASK_ENV"] == "production" and app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite"):
     print("WARNING: SQLite is being used in production. Move to PostgreSQL before real deployment.")
+
+
+@app.template_filter("safe_markdown")
+def safe_markdown_filter(text):
+    if not text:
+        return ""
+
+    html = markdown.markdown(
+        text,
+        extensions=["nl2br", "sane_lists"]
+    )
+
+    allowed_tags = [
+        "p", "br", "strong", "em", "ul", "ol", "li",
+        "h1", "h2", "h3", "h4", "blockquote"
+    ]
+
+    allowed_attributes = {}
+
+    clean_html = bleach.clean(
+        html,
+        tags=allowed_tags,
+        attributes=allowed_attributes,
+        strip=True
+    )
+
+    return Markup(clean_html)
 
 
 @app.template_filter("fromjson")
@@ -591,8 +621,23 @@ def allowed_file(filename):
 
 @app.route("/")
 def index():
+    current_user = get_current_user()
+    active_subscription = None
+    plan_name = "guest"
+
+    if current_user:
+        active_subscription = get_active_subscription(current_user)
+
+        if active_subscription:
+            plan_name = active_subscription.plan_name or "free_trial"
+        else:
+            plan_name = "free_trial"
+
     return render_template(
-        "index.html"
+        "index.html",
+        current_user=current_user,
+        active_subscription=active_subscription,
+        plan_name=plan_name
     )
 
 
@@ -2546,6 +2591,50 @@ def admin_dashboard():
         year=year,
         recent_users=recent_users,
         recent_upgrade_requests=recent_upgrade_requests
+    )
+
+
+@app.route("/support", methods=["GET", "POST"])
+@user_required
+def support():
+    current_user = get_current_user()
+
+    if request.method == "POST":
+        subject = request.form.get("subject", "").strip()
+        message = request.form.get("message", "").strip()
+
+        if not subject or not message:
+            flash("Please enter both subject and message.", "error")
+            return redirect(url_for("support"))
+
+        support_message = SupportMessage(
+            user_id=current_user.id,
+            subject=subject,
+            message=message,
+            status="open"
+        )
+
+        db.session.add(support_message)
+        db.session.commit()
+
+        flash("Your message has been sent to the developer.", "success")
+        return redirect(url_for("support"))
+
+    return render_template("support.html")
+
+
+@app.route("/admin/support")
+@admin_required
+def admin_support_messages():
+    messages = (
+        SupportMessage.query
+        .order_by(SupportMessage.created_at.desc())
+        .all()
+    )
+
+    return render_template(
+        "admin_support_messages.html",
+        messages=messages
     )
 
 

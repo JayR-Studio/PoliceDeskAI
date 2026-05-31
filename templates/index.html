@@ -8,6 +8,18 @@
         <h3>Good morning, Officer</h3>
         <p>Your AI assistant for police documents, procedures, scenarios, and reports.</p>
     </div>
+    {% if current_user %}
+    <div class="dashboard-plan-strip plan-{{ plan_name }}">
+        <div>
+            <span>Account access</span>
+            <strong>{{ plan_name|replace("_", " ")|title }}</strong>
+        </div>
+
+        {% if active_subscription and active_subscription.expires_at %}
+        <small>Valid until {{ active_subscription.expires_at.strftime("%d %b %Y") }}</small>
+        {% endif %}
+    </div>
+    {% endif %}
 
     <a href="{{ url_for('chat') }}" class="primary-btn">Ask Manual</a>
 </section>

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block page_title %}Support Messages{% endblock %}
+
+{% block content %}
+<section class="admin-users-shell">
+    <div class="usage-hero">
+        <div>
+            <p class="reader-eyebrow">Admin Support</p>
+            <h3>User Complaints & Feedback</h3>
+            <p>Review messages submitted by users.</p>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="upgrade-request-list">
+            {% for item in messages %}
+                <article class="upgrade-request-card">
+                    <div class="upgrade-request-main">
+                        <div>
+                            <h4>{{ item.subject }}</h4>
+                            <p>
+                                {% if item.user %}
+                                    {{ item.user.full_name }} • {{ item.user.email }}
+                                {% else %}
+                                    Unknown user
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <span class="user-status-pill status-{{ item.status }}">
+                            {{ item.status|title }}
+                        </span>
+                    </div>
+
+                    <div class="upgrade-request-message">
+                        <span>Message</span>
+                        <p>{{ item.message }}</p>
+                    </div>
+
+                    <p class="upgrade-note">
+                        Sent on {{ item.created_at.strftime("%d %b %Y, %I:%M %p") }}
+                    </p>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-mini-state">
+            <p>No support messages yet.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

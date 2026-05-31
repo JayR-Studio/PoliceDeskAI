@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block page_title %}Upgrade Requests{% endblock %}
+
+{% block content %}
+<section class="admin-users-shell">
+    <div class="usage-hero">
+        <div>
+            <p class="reader-eyebrow">Admin Control</p>
+            <h3>Upgrade Requests</h3>
+            <p>Review users who requested plan upgrades.</p>
+        </div>
+    </div>
+
+    {% if upgrade_requests %}
+    <div class="upgrade-request-list">
+        {% for request_item in upgrade_requests %}
+        <article class="upgrade-request-card">
+            <div class="upgrade-request-main">
+                <div>
+                    <h4>{{ request_item.user.full_name }}</h4>
+                    <p>{{ request_item.user.email }}</p>
+                </div>
+
+                <span class="user-status-pill status-{{ request_item.status }}">
+                            {{ request_item.status|title }}
+                </span>
+                {% if request_item.status == "approved" %}
+                <p class="upgrade-approved-note">
+                    This request has been approved and the user plan should now be active.
+                </p>
+                {% endif %}
+            </div>
+
+            <div class="upgrade-request-details">
+                <div>
+                    <span>Requested Plan</span>
+                    <strong>{{ request_item.requested_plan|replace("_", " ")|title }}</strong>
+                </div>
+
+                <div>
+                    <span>Payment Reference</span>
+                    <strong>{{ request_item.payment_reference or "Not provided" }}</strong>
+                </div>
+
+                <div>
+                    <span>Requested On</span>
+                    <strong>{{ request_item.created_at.strftime("%d %b %Y") }}</strong>
+                </div>
+            </div>
+
+            {% if request_item.message %}
+            <div class="upgrade-request-message">
+                <span>Message</span>
+                <p>{{ request_item.message }}</p>
+            </div>
+            {% endif %}
+
+            <div class="upgrade-request-actions">
+                <a
+                        href="{{ url_for('admin_user_detail', user_id=request_item.user.id) }}"
+                        class="secondary-btn"
+                >
+                    Manage User
+                </a>
+
+                <div class="upgrade-request-button-group">
+                    {% if request_item.status != "approved" %}
+                    <form
+                            method="POST"
+                            action="{{ url_for('update_upgrade_request_status', request_id=request_item.id) }}"
+                            onsubmit="return confirm('Approve this request and activate the user plan?');"
+                    >
+                        <input type="hidden" name="status" value="approved">
+                        <button type="submit" class="primary-btn">
+                            Approve & Activate
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    {% if request_item.status != "rejected" %}
+                    <form
+                            method="POST"
+                            action="{{ url_for('update_upgrade_request_status', request_id=request_item.id) }}"
+                            onsubmit="return confirm('Reject this upgrade request?');"
+                    >
+                        <input type="hidden" name="status" value="rejected">
+                        <button type="submit" class="small-danger-btn">
+                            Reject
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    {% if request_item.status != "pending" %}
+                    <form
+                            method="POST"
+                            action="{{ url_for('update_upgrade_request_status', request_id=request_item.id) }}"
+                    >
+                        <input type="hidden" name="status" value="pending">
+                        <button type="submit" class="secondary-btn">
+                            Mark Pending
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-mini-state">
+        <p>No upgrade requests yet.</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

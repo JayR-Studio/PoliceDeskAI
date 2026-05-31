@@ -62,11 +62,13 @@
 
             {% if session.get("user_id") %}
             <a href="{{ url_for('usage_dashboard') }}">My Usage</a>
+            <a href="{{ url_for('upgrade') }}">Upgrade</a>
             {% endif %}
 
             {% if session.get("is_admin") %}
             <a href="{{ url_for('admin_upload') }}">Upload Documents</a>
             <a href="{{ url_for('admin_users') }}">Manage Users</a>
+            <a href="{{ url_for('admin_upgrade_requests') }}">Upgrade Requests</a>
             {% endif %}
 
             {% if not session.get("user_id") %}

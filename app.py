@@ -22,7 +22,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from werkzeug.utils import secure_filename
 from config import Config
 from models import (db, Document, DocumentChunk, ChatSession, ChatMessage, CBTSession, CBTQuestion, CBTQuestionBank,
-                    SavedSummary, User, UserSubscription, UsageLog)
+                    SavedSummary, User, UserSubscription, UsageLog, UpgradeRequest)
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime, timedelta
@@ -2255,6 +2255,130 @@ def update_user_status(user_id):
 
     flash(f"{user.full_name}'s account status has been updated.", "success")
     return redirect(url_for("admin_users"))
+
+
+@app.route("/upgrade", methods=["GET", "POST"])
+@user_required
+def upgrade():
+    current_user = get_current_user()
+
+    if not current_user:
+        flash("Please login to continue.", "error")
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        requested_plan = request.form.get("requested_plan", "").strip()
+        payment_reference = request.form.get("payment_reference", "").strip()
+        message = request.form.get("message", "").strip()
+
+        allowed_plans = ["basic", "standard", "premium"]
+
+        if requested_plan not in allowed_plans:
+            flash("Please select a valid upgrade plan.", "error")
+            return redirect(url_for("upgrade"))
+
+        upgrade_request = UpgradeRequest(
+            user_id=current_user.id,
+            requested_plan=requested_plan,
+            payment_reference=payment_reference if payment_reference else None,
+            message=message if message else None,
+            status="pending"
+        )
+
+        db.session.add(upgrade_request)
+        db.session.commit()
+
+        flash("Upgrade request submitted successfully. Admin will review your payment.", "success")
+        return redirect(url_for("usage_dashboard"))
+
+    return render_template("upgrade.html")
+
+
+@app.route("/admin/upgrade-requests")
+@admin_required
+def admin_upgrade_requests():
+    requests = (
+        UpgradeRequest.query
+        .order_by(UpgradeRequest.created_at.desc())
+        .all()
+    )
+
+    return render_template(
+        "admin_upgrade_requests.html",
+        upgrade_requests=requests
+    )
+
+
+@app.route("/admin/upgrade-requests/<int:request_id>/status", methods=["POST"])
+@admin_required
+def update_upgrade_request_status(request_id):
+    upgrade_request = UpgradeRequest.query.get_or_404(request_id)
+
+    new_status = request.form.get("status", "").strip()
+
+    allowed_statuses = ["pending", "approved", "rejected"]
+
+    if new_status not in allowed_statuses:
+        flash("Invalid request status.", "error")
+        return redirect(url_for("admin_upgrade_requests"))
+
+    if upgrade_request.status == "approved" and new_status == "approved":
+        flash("This request has already been approved.", "error")
+        return redirect(url_for("admin_upgrade_requests"))
+
+    user = User.query.get(upgrade_request.user_id)
+
+    if not user:
+        flash("User attached to this upgrade request was not found.", "error")
+        return redirect(url_for("admin_upgrade_requests"))
+
+    try:
+        upgrade_request.status = new_status
+        upgrade_request.reviewed_at = datetime.utcnow()
+
+        if new_status == "approved":
+            requested_plan = upgrade_request.requested_plan
+
+            allowed_plans = ["basic", "standard", "premium"]
+
+            if requested_plan not in allowed_plans:
+                flash("Invalid requested plan. Cannot approve this request.", "error")
+                return redirect(url_for("admin_upgrade_requests"))
+
+            duration_days = get_plan_duration_days(requested_plan)
+
+            new_subscription = UserSubscription(
+                user_id=user.id,
+                plan_name=requested_plan,
+                payment_status="active",
+                amount_paid=PLAN_PRICES.get(requested_plan, 0),
+                currency="NGN",
+                starts_at=datetime.utcnow(),
+                expires_at=datetime.utcnow() + timedelta(days=duration_days)
+            )
+
+            db.session.add(new_subscription)
+
+            user.account_status = "active"
+
+            flash(
+                f"{user.full_name}'s {requested_plan.replace('_', ' ').title()} plan has been activated.",
+                "success"
+            )
+
+        elif new_status == "rejected":
+            flash("Upgrade request rejected.", "success")
+
+        else:
+            flash("Upgrade request returned to pending.", "success")
+
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Failed to update upgrade request: {str(e)}", "error")
+
+    return redirect(url_for("admin_upgrade_requests"))
 
 
 if __name__ == "__main__":

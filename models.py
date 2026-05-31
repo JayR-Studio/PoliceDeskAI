@@ -215,6 +215,25 @@ class UserSubscription(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
 
 
+class UpgradeRequest(db.Model):
+    __tablename__ = "upgrade_requests"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    requested_plan = db.Column(db.String(50), nullable=False)
+    payment_reference = db.Column(db.String(255), nullable=True)
+    message = db.Column(db.Text, nullable=True)
+
+    status = db.Column(db.String(50), default="pending")
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    reviewed_at = db.Column(db.DateTime, nullable=True)
+
+    user = db.relationship("User", backref="upgrade_requests")
+
+
 class UsageLog(db.Model):
     __tablename__ = "usage_logs"
 

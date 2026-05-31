@@ -6022,6 +6022,223 @@ body[data-theme="dark"] .real-chat-card .smart-chat-form .answer-style-select {
 }
 
 /* ================================
+   Upgrade Request Flow
+   ================================ */
+
+.upgrade-shell {
+    display: grid;
+    gap: 18px;
+}
+
+.upgrade-plan-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.upgrade-plan-card,
+.upgrade-card,
+.upgrade-request-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
+    min-width: 0;
+    overflow-wrap: break-word;
+}
+
+.featured-upgrade-plan {
+    border-color: rgba(56, 189, 248, 0.35);
+    background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 35%),
+        var(--card);
+}
+
+.upgrade-plan-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+
+.upgrade-plan-header h4 {
+    margin: 0;
+    color: var(--text);
+    font-size: 20px;
+}
+
+.upgrade-plan-header strong {
+    display: block;
+    margin-top: 6px;
+    color: var(--blue);
+    font-size: 14px;
+}
+
+.upgrade-plan-card ul {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 7px;
+}
+
+.upgrade-plan-card li {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.upgrade-layout {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 14px;
+}
+
+.payment-instruction-box {
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    display: grid;
+    gap: 8px;
+}
+
+.payment-instruction-box p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.45;
+}
+
+.payment-instruction-box strong {
+    color: var(--text);
+}
+
+.upgrade-note {
+    margin: 12px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.upgrade-form,
+.upgrade-status-form {
+    display: grid;
+    gap: 10px;
+}
+
+.upgrade-form label {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 850;
+}
+
+.upgrade-form input,
+.upgrade-form select,
+.upgrade-form textarea,
+.upgrade-status-form select {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--card-soft);
+    color: var(--text);
+    border-radius: 13px;
+    padding: 11px;
+    outline: none;
+}
+
+.upgrade-form textarea {
+    resize: vertical;
+}
+
+.upgrade-request-list {
+    display: grid;
+    gap: 12px;
+}
+
+.upgrade-request-main {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+}
+
+.upgrade-request-main h4 {
+    margin: 0;
+    color: var(--text);
+    font-size: 17px;
+}
+
+.upgrade-request-main p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.upgrade-request-details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.upgrade-request-details div,
+.upgrade-request-message {
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 11px;
+}
+
+.upgrade-request-details span,
+.upgrade-request-message span {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.upgrade-request-details strong,
+.upgrade-request-message p {
+    margin: 5px 0 0;
+    color: var(--text);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.upgrade-request-actions {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 10px;
+    margin-top: 12px;
+    align-items: end;
+}
+
+.upgrade-status-form {
+    grid-template-columns: minmax(0, 1fr) 120px;
+}
+
+@media (max-width: 900px) {
+    .upgrade-plan-grid,
+    .upgrade-layout,
+    .upgrade-request-details,
+    .upgrade-request-actions,
+    .upgrade-status-form {
+        grid-template-columns: 1fr;
+    }
+
+    .upgrade-plan-card,
+    .upgrade-card,
+    .upgrade-request-card {
+        padding: 12px;
+        border-radius: 16px;
+    }
+
+    .upgrade-request-main {
+        display: grid;
+    }
+}
+
+/* ================================
    Usage Plan Package Cards
    ================================ */
 
@@ -6300,5 +6517,82 @@ body[data-theme="dark"] .real-chat-card .smart-chat-form .answer-style-select {
 
     .user-status-pill {
         width: fit-content;
+    }
+}
+
+/* ================================
+   Desktop Sidebar Scroll Fix
+   ================================ */
+
+@media (min-width: 801px) {
+    .sidebar {
+        height: 100vh;
+        max-height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: sticky;
+        top: 0;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+    }
+
+    .sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.28);
+        border-radius: 999px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+        background: rgba(148, 163, 184, 0.45);
+    }
+}
+
+/* ================================
+   Upgrade Request Approval Buttons
+   ================================ */
+
+.upgrade-request-button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.upgrade-request-button-group form {
+    margin: 0;
+}
+
+.upgrade-request-button-group button {
+    width: auto;
+    min-height: 40px;
+    border-radius: 12px;
+    font-size: 12.5px;
+}
+
+.upgrade-approved-note {
+    margin: 6px 0 0;
+    color: var(--success);
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.4;
+}
+
+@media (max-width: 700px) {
+    .upgrade-request-button-group {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
+
+    .upgrade-request-button-group form,
+    .upgrade-request-button-group button {
+        width: 100%;
     }
 }

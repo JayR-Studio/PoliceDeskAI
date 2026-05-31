@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block page_title %}Upgrade Plan{% endblock %}
+
+{% block content %}
+<section class="upgrade-shell">
+    <div class="usage-hero">
+        <div>
+            <p class="reader-eyebrow">Upgrade Access</p>
+            <h3>Upgrade PoliceDesk AI</h3>
+            <p>
+                Choose a plan, make payment, and submit your payment reference for admin approval.
+            </p>
+        </div>
+    </div>
+
+    <section class="upgrade-plan-grid">
+        <article class="upgrade-plan-card">
+            <div class="upgrade-plan-header">
+                <h4>Basic</h4>
+                <strong>₦10,000/year</strong>
+            </div>
+
+            <ul>
+                <li>50 AI chat questions/month</li>
+                <li>3 study notes/month</li>
+                <li>Unlimited CBT practice</li>
+                <li>Unlimited document library access</li>
+                <li>Source references included</li>
+            </ul>
+        </article>
+
+        <article class="upgrade-plan-card featured-upgrade-plan">
+            <div class="upgrade-plan-header">
+                <h4>Standard</h4>
+                <strong>₦20,000/year</strong>
+            </div>
+
+            <ul>
+                <li>150 AI chat questions/month</li>
+                <li>10 study notes/month</li>
+                <li>Unlimited CBT practice</li>
+                <li>Unlimited document library access</li>
+                <li>Score history and study recommendations</li>
+            </ul>
+        </article>
+
+        <article class="upgrade-plan-card">
+            <div class="upgrade-plan-header">
+                <h4>Premium</h4>
+                <strong>₦30,000/year</strong>
+            </div>
+
+            <ul>
+                <li>300 AI chat questions/month</li>
+                <li>20 study notes/month</li>
+                <li>Unlimited CBT practice</li>
+                <li>Unlimited document library access</li>
+                <li>Priority access to new features</li>
+            </ul>
+        </article>
+    </section>
+
+    <div class="upgrade-layout">
+        <section class="upgrade-card">
+            <div class="usage-account-header">
+                <h4>Payment Instructions</h4>
+                <p>Make payment first, then submit your upgrade request.</p>
+            </div>
+
+            <div class="payment-instruction-box">
+                <p><strong>Bank:</strong> Add your bank name here</p>
+                <p><strong>Account Name:</strong> Add account name here</p>
+                <p><strong>Account Number:</strong> Add account number here</p>
+                <p><strong>Narration:</strong> PoliceDesk AI - Your Name</p>
+            </div>
+
+            <p class="upgrade-note">
+                After payment, enter your payment reference or transaction details in the form.
+            </p>
+        </section>
+
+        <section class="upgrade-card">
+            <div class="usage-account-header">
+                <h4>Submit Upgrade Request</h4>
+                <p>Admin will review your request and activate your plan.</p>
+            </div>
+
+            <form method="POST" class="upgrade-form">
+                <label for="requested_plan">Select Plan</label>
+                <select name="requested_plan" id="requested_plan" required>
+                    <option value="">Choose a plan</option>
+                    <option value="basic">Basic - ₦10,000/year</option>
+                    <option value="standard">Standard - ₦20,000/year</option>
+                    <option value="premium">Premium - ₦30,000/year</option>
+                </select>
+
+                <label for="payment_reference">Payment Reference</label>
+                <input
+                    type="text"
+                    name="payment_reference"
+                    id="payment_reference"
+                    placeholder="Example: transfer reference, sender name, or transaction ID"
+                >
+
+                <label for="message">Message</label>
+                <textarea
+                    name="message"
+                    id="message"
+                    rows="4"
+                    placeholder="Optional message to admin"
+                ></textarea>
+
+                <button type="submit" class="primary-btn">
+                    Submit Upgrade Request
+                </button>
+            </form>
+        </section>
+    </div>
+</section>
+{% endblock %}

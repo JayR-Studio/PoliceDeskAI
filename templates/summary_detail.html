@@ -34,6 +34,7 @@
                 action="{{ url_for('delete_summary', summary_id=summary.id) }}"
                 onsubmit="return confirm('Delete this summary permanently?');"
         >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="small-danger-btn">
                 Delete Summary
             </button>

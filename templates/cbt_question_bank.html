@@ -71,6 +71,7 @@
                                     action="{{ url_for('delete_cbt_bank_question', question_id=question.id) }}"
                                     onsubmit="return confirm('Delete this CBT question permanently?');"
                                 >
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="small-danger-btn">
                                         Delete
                                     </button>
@@ -173,6 +174,7 @@
                                 action="{{ url_for('generate_cbt_bank', document_id=document.id) }}"
                                 class="inline-form"
                             >
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="secondary-btn cbt-generate-btn">
                                     Generate More
                                 </button>

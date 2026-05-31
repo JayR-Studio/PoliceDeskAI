@@ -106,6 +106,7 @@
                     action="{{ url_for('update_user_subscription', user_id=user.id) }}"
                     class="admin-user-form"
             >
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <label>Plan</label>
                 <select name="plan_name">
                     <option value="free_trial" {% if latest_subscription and latest_subscription.plan_name==
@@ -145,6 +146,7 @@
                     action="{{ url_for('update_user_status', user_id=user.id) }}"
                     class="admin-user-form"
             >
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <label>Account Status</label>
                 <select name="account_status">
                     <option value="trial" {% if user.account_status==

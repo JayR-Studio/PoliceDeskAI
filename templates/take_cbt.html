@@ -20,6 +20,7 @@
 
     {% if questions %}
         <form method="POST" action="{{ url_for('submit_cbt', session_id=cbt_session.id) }}" class="cbt-exam-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="cbt-exam-layout">
                 <aside class="question-nav-panel">
                     <h4>Questions</h4>

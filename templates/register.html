@@ -11,6 +11,7 @@
         </div>
 
         <form method="POST" class="auth-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <label for="full_name">Full name</label>
             <input type="text" name="full_name" id="full_name" required>
 

@@ -80,12 +80,14 @@
 
         {% if session.get("is_admin") %}
         <form method="POST" action="{{ url_for('admin_logout') }}" class="logout-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit">Logout Admin</button>
         </form>
         {% endif %}
 
         {% if session.get("user_id") %}
         <form method="POST" action="{{ url_for('logout') }}" class="logout-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit">Logout User</button>
         </form>
         {% endif %}

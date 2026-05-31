@@ -22,6 +22,7 @@
             </a>
 
             <form method="POST" action="{{ url_for('backfill_vector_embeddings') }}" class="inline-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="secondary-btn">
                     Backfill Vector Embeddings
                 </button>
@@ -33,18 +34,21 @@
     {% if session.get("is_admin") %}
     <div class="danger-actions admin-danger-zone">
         <form method="POST" action="{{ url_for('clear_embeddings') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="danger-outline-btn">
                 Clear Embeddings Only
             </button>
         </form>
 
         <form method="POST" action="{{ url_for('clear_documents') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="danger-btn">
                 Clear Documents & Chunks
             </button>
         </form>
 
         <form method="POST" action="{{ url_for('full_reset') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="danger-btn">
                 Full Reset
             </button>
@@ -112,6 +116,7 @@
                         action="{{ url_for('delete_document', document_id=document.id) }}"
                         onsubmit="return confirm('Are you sure you want to delete this document and all its chunks?');"
                 >
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="small-danger-btn">
                         Delete
                     </button>

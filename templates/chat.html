@@ -5,22 +5,6 @@
 {% block page_title %}Ask Manual{% endblock %}
 
 {% block content %}
-<header class="mobile-chat-header">
-    <button type="button" class="chat-menu-btn" id="chatMenuBtn">
-        ☰
-    </button>
-
-    <div class="mobile-chat-title">
-        <strong>PoliceDesk AI</strong>
-        <span>Ask Manual</span>
-    </div>
-
-    <button type="button" class="chat-more-btn">
-        ⋮
-    </button>
-</header>
-
-<div class="chat-sidebar-backdrop" id="chatSidebarBackdrop"></div>
 <section class="chat-card real-chat-card">
     <div class="chat-header-row">
         <div class="assistant-message compact-intro">
@@ -32,6 +16,7 @@
         </div>
 
         <form method="POST" action="{{ url_for('clear_chat') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="secondary-btn clear-chat-btn">Clear Chat</button>
         </form>
     </div>
@@ -159,11 +144,12 @@
     </div>
 
     <form method="POST" class="chat-form active-chat-form smart-chat-form" id="chatForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <textarea
-                type="text"
                 name="query"
                 id="chatInput"
                 placeholder="Ask from the uploaded police documents..."
+                rows="1"
                 required
         ></textarea>
 
@@ -285,39 +271,6 @@
 
     if (conversationWindow) {
         conversationWindow.scrollTop = conversationWindow.scrollHeight;
-    }
-</script>
-<script>
-    const chatMenuBtn = document.getElementById("chatMenuBtn");
-    const chatSidebarBackdrop = document.getElementById("chatSidebarBackdrop");
-    const sidebar = document.querySelector(".sidebar");
-
-    function openChatSidebar() {
-        if (sidebar) {
-            sidebar.classList.add("sidebar-open");
-        }
-
-        if (chatSidebarBackdrop) {
-            chatSidebarBackdrop.classList.add("active");
-        }
-    }
-
-    function closeChatSidebar() {
-        if (sidebar) {
-            sidebar.classList.remove("sidebar-open");
-        }
-
-        if (chatSidebarBackdrop) {
-            chatSidebarBackdrop.classList.remove("active");
-        }
-    }
-
-    if (chatMenuBtn) {
-        chatMenuBtn.addEventListener("click", openChatSidebar);
-    }
-
-    if (chatSidebarBackdrop) {
-        chatSidebarBackdrop.addEventListener("click", closeChatSidebar);
     }
 </script>
 <script>

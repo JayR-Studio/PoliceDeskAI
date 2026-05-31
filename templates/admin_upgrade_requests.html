@@ -71,6 +71,7 @@
                             action="{{ url_for('update_upgrade_request_status', request_id=request_item.id) }}"
                             onsubmit="return confirm('Approve this request and activate the user plan?');"
                     >
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="status" value="approved">
                         <button type="submit" class="primary-btn">
                             Approve & Activate
@@ -84,6 +85,7 @@
                             action="{{ url_for('update_upgrade_request_status', request_id=request_item.id) }}"
                             onsubmit="return confirm('Reject this upgrade request?');"
                     >
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="status" value="rejected">
                         <button type="submit" class="small-danger-btn">
                             Reject
@@ -96,6 +98,7 @@
                             method="POST"
                             action="{{ url_for('update_upgrade_request_status', request_id=request_item.id) }}"
                     >
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="status" value="pending">
                         <button type="submit" class="secondary-btn">
                             Mark Pending

@@ -50,8 +50,11 @@ class ChatSession(db.Model):
     __tablename__ = "chat_sessions"
 
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     title = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
+
+    user = db.relationship("User", backref="chat_sessions")
 
     messages = db.relationship(
         "ChatMessage",
@@ -80,6 +83,7 @@ class CBTSession(db.Model):
     __tablename__ = "cbt_sessions"
 
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
 
     title = db.Column(db.String(255), nullable=True)
     selected_document_ids = db.Column(db.Text, nullable=False)
@@ -100,6 +104,8 @@ class CBTSession(db.Model):
         lazy=True,
         cascade="all, delete-orphan"
     )
+
+    user = db.relationship("User", backref="cbt_sessions")
 
 
 class CBTQuestion(db.Model):
@@ -152,6 +158,7 @@ class SavedSummary(db.Model):
     __tablename__ = "saved_summaries"
 
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
 
     document_id = db.Column(db.Integer, db.ForeignKey("documents.id"), nullable=False)
 
@@ -164,6 +171,7 @@ class SavedSummary(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
 
     document = db.relationship("Document", backref="summaries")
+    user = db.relationship("User", backref="saved_summaries")
     
 
 class User(db.Model):
@@ -177,6 +185,9 @@ class User(db.Model):
 
     role = db.Column(db.String(50), default="user")
     account_status = db.Column(db.String(50), default="trial")
+
+    failed_login_attempts = db.Column(db.Integer, default=0)
+    locked_until = db.Column(db.DateTime, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.now)
     last_login = db.Column(db.DateTime, nullable=True)

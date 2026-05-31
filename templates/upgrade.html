@@ -69,9 +69,9 @@
             </div>
 
             <div class="payment-instruction-box">
-                <p><strong>Bank:</strong> Add your bank name here</p>
-                <p><strong>Account Name:</strong> Add account name here</p>
-                <p><strong>Account Number:</strong> Add account number here</p>
+                <p><strong>Bank:</strong> KUDA Bank</p>
+                <p><strong>Account Name:</strong> JOSEPH SAMUEL GWANTO</p>
+                <p><strong>Account Number:</strong> 2007699449</p>
                 <p><strong>Narration:</strong> PoliceDesk AI - Your Name</p>
             </div>
 
@@ -87,6 +87,7 @@
             </div>
 
             <form method="POST" class="upgrade-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <label for="requested_plan">Select Plan</label>
                 <select name="requested_plan" id="requested_plan" required>
                     <option value="">Choose a plan</option>
@@ -100,7 +101,7 @@
                     type="text"
                     name="payment_reference"
                     id="payment_reference"
-                    placeholder="Example: transfer reference, sender name, or transaction ID"
+                    placeholder="Example: sender name or transaction ID"
                 >
 
                 <label for="message">Message</label>

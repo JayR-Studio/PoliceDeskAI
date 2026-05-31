@@ -19,6 +19,7 @@ from services.cbt_generator import distribute_questions, generate_question_bank_
 
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session, send_from_directory, \
     Response
+from flask_wtf.csrf import CSRFProtect
 from werkzeug.utils import secure_filename
 from config import Config
 from models import (db, Document, DocumentChunk, ChatSession, ChatMessage, CBTSession, CBTQuestion, CBTQuestionBank,
@@ -32,6 +33,8 @@ ALLOWED_EXTENSIONS = {"pdf", "docx", "txt"}
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+csrf = CSRFProtect(app)
 
 if app.config["FLASK_ENV"] == "production" and app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite"):
     print("WARNING: SQLite is being used in production. Move to PostgreSQL before real deployment.")
@@ -109,6 +112,19 @@ def get_active_subscription(user):
     )
 
     return active_subscription
+
+
+def clear_user_session():
+    session.pop("user_id", None)
+    session.pop("user_name", None)
+    session.pop("user_role", None)
+    session.pop("chat_session_id", None)
+    session.pop("typewriter_message_id", None)
+
+
+def clear_admin_session():
+    session.pop("is_admin", None)
+    session.pop("admin_login_time", None)
 
 
 def user_can_perform_action(action_type):
@@ -233,15 +249,27 @@ def uploaded_file_is_too_large(file):
 
 
 def get_or_create_chat_session():
+    user_id = session.get("user_id")
+
+    if not user_id:
+        return None
+
     chat_session_id = session.get("chat_session_id")
 
     if chat_session_id:
-        existing_session = ChatSession.query.get(chat_session_id)
+        existing_session = ChatSession.query.filter_by(
+            id=chat_session_id,
+            user_id=user_id
+        ).first()
 
         if existing_session:
             return existing_session
 
-    new_session = ChatSession(title="New Chat")
+    new_session = ChatSession(
+        title="New Chat",
+        user_id=user_id
+    )
+
     db.session.add(new_session)
     db.session.commit()
 
@@ -311,8 +339,27 @@ def record_user_usage(action_type):
 def user_required(route_function):
     @wraps(route_function)
     def wrapper(*args, **kwargs):
-        if not session.get("user_id"):
+        user_id = session.get("user_id")
+
+        if not user_id:
             flash("Please login to continue.", "error")
+            return redirect(url_for("login"))
+
+        if session.get("is_admin"):
+            clear_admin_session()
+
+        user = User.query.get(user_id)
+
+        if not user:
+            clear_user_session()
+
+            flash("Your session is no longer valid. Please login again.", "error")
+            return redirect(url_for("login"))
+
+        if user.account_status == "suspended":
+            clear_user_session()
+
+            flash("Your account has been suspended. Please contact admin.", "error")
             return redirect(url_for("login"))
 
         return route_function(*args, **kwargs)
@@ -353,6 +400,8 @@ def admin_required(route_function):
         if not is_admin_logged_in():
             flash("Please login as admin to access that page.", "error")
             return redirect(url_for("admin_login"))
+
+        clear_user_session()
 
         return route_function(*args, **kwargs)
 
@@ -560,10 +609,13 @@ def admin_login():
         admin_password = os.getenv("ADMIN_PASSWORD")
 
         if username == admin_username and password == admin_password:
+            clear_user_session()
+
             session["is_admin"] = True
             session["admin_login_time"] = datetime.now().isoformat()
+
             flash("Admin login successful.", "success")
-            return redirect(url_for("documents"))
+            return redirect(url_for("admin_dashboard"))
 
         flash("Invalid admin username or password.", "error")
 
@@ -572,8 +624,8 @@ def admin_login():
 
 @app.route("/admin/logout", methods=["POST"])
 def admin_logout():
-    session.pop("is_admin", None)
-    session.pop("admin_login_time", None)
+    clear_admin_session()
+
     flash("Admin logged out successfully.", "success")
     return redirect(url_for("index"))
 
@@ -1353,6 +1405,8 @@ def health_check():
 def cbt():
     documents = Document.query.order_by(Document.created_at.desc()).all()
 
+    current_user = get_current_user()
+
     document_question_counts = {}
 
     for document in documents:
@@ -1362,6 +1416,7 @@ def cbt():
 
     recent_sessions = (
         CBTSession.query
+        .filter_by(user_id=current_user.id)
         .filter(CBTSession.score.isnot(None))
         .order_by(CBTSession.created_at.desc())
         .limit(5)
@@ -1370,6 +1425,7 @@ def cbt():
 
     latest_completed_session = (
         CBTSession.query
+        .filter_by(user_id=current_user.id)
         .filter(CBTSession.score.isnot(None))
         .order_by(CBTSession.completed_at.desc())
         .first()
@@ -1453,6 +1509,7 @@ def cbt():
             session_title += f" + {len(selected_titles) - 2} more"
 
         cbt_session = CBTSession(
+            user_id=current_user.id,
             title=session_title,
             selected_document_ids=",".join(selected_documents),
             total_questions=question_count,
@@ -1519,7 +1576,12 @@ def cbt():
 @app.route("/cbt/<int:session_id>")
 @user_required
 def take_cbt(session_id):
-    cbt_session = CBTSession.query.get_or_404(session_id)
+    current_user = get_current_user()
+
+    cbt_session = CBTSession.query.filter_by(
+        id=session_id,
+        user_id=current_user.id
+    ).first_or_404()
 
     questions = (
         CBTQuestion.query
@@ -1593,7 +1655,12 @@ def generate_cbt_bank(document_id):
 @app.route("/cbt/<int:session_id>/submit", methods=["POST"])
 @user_required
 def submit_cbt(session_id):
-    cbt_session = CBTSession.query.get_or_404(session_id)
+    current_user = get_current_user()
+
+    cbt_session = CBTSession.query.filter_by(
+        id=session_id,
+        user_id=current_user.id
+    ).first_or_404()
 
     questions = (
         CBTQuestion.query
@@ -1634,7 +1701,12 @@ def submit_cbt(session_id):
 @app.route("/cbt/<int:session_id>/result")
 @user_required
 def cbt_result(session_id):
-    cbt_session = CBTSession.query.get_or_404(session_id)
+    current_user = get_current_user()
+
+    cbt_session = CBTSession.query.filter_by(
+        id=session_id,
+        user_id=current_user.id
+    ).first_or_404()
 
     questions = (
         CBTQuestion.query
@@ -1889,10 +1961,13 @@ def delete_cbt_bank_question(question_id):
 @app.route("/summaries", methods=["GET", "POST"])
 @user_required
 def summaries():
+    current_user = get_current_user()
+
     documents = Document.query.order_by(Document.created_at.desc()).all()
 
     recent_summaries = (
         SavedSummary.query
+        .filter_by(user_id=current_user.id)
         .order_by(SavedSummary.created_at.desc())
         .limit(8)
         .all()
@@ -1918,6 +1993,7 @@ def summaries():
             return redirect(url_for("summaries"))
 
         saved_summary = SavedSummary(
+            user_id=current_user.id,
             document_id=document.id,
             title=f"Study Notes: {document.title}",
             summary_type="full_document",
@@ -1960,7 +2036,12 @@ def summaries():
 @app.route("/summaries/<int:summary_id>")
 @user_required
 def view_summary(summary_id):
-    summary = SavedSummary.query.get_or_404(summary_id)
+    current_user = get_current_user()
+
+    summary = SavedSummary.query.filter_by(
+        id=summary_id,
+        user_id=current_user.id
+    ).first_or_404()
 
     return render_template(
         "summary_detail.html",
@@ -2009,6 +2090,10 @@ def register():
             flash("Passwords do not match.", "error")
             return redirect(url_for("register"))
 
+        if len(password) < 8:
+            flash("Password must be at least 8 characters long.", "error")
+            return redirect(url_for("register"))
+
         existing_user = User.query.filter_by(email=email).first()
 
         if existing_user:
@@ -2039,6 +2124,8 @@ def register():
         db.session.add(trial_subscription)
         db.session.commit()
 
+        clear_admin_session()
+
         session["user_id"] = new_user.id
         session["user_name"] = new_user.full_name
         session["user_role"] = new_user.role
@@ -2064,7 +2151,20 @@ def login():
 
         user = User.query.filter_by(email=email).first()
 
+        if user and user.locked_until and user.locked_until > datetime.now():
+            flash("Too many failed login attempts. Please try again later.", "error")
+            return redirect(url_for("login"))
+
         if not user or not check_password_hash(user.password_hash, password):
+            if user:
+                user.failed_login_attempts = (user.failed_login_attempts or 0) + 1
+
+                if user.failed_login_attempts >= 5:
+                    user.locked_until = datetime.now() + timedelta(minutes=10)
+                    user.failed_login_attempts = 0
+
+                db.session.commit()
+
             flash("Invalid email or password.", "error")
             return redirect(url_for("login"))
 
@@ -2072,6 +2172,10 @@ def login():
             flash("Your account has been suspended. Please contact admin.", "error")
             return redirect(url_for("login"))
 
+        clear_admin_session()
+
+        user.failed_login_attempts = 0
+        user.locked_until = None
         user.last_login = datetime.now()
         db.session.commit()
 
@@ -2087,9 +2191,7 @@ def login():
 
 @app.route("/logout", methods=["POST"])
 def logout():
-    session.pop("user_id", None)
-    session.pop("user_name", None)
-    session.pop("user_role", None)
+    clear_user_session()
 
     flash("You have been logged out.", "success")
     return redirect(url_for("login"))
@@ -2234,7 +2336,7 @@ def update_user_subscription(user_id):
     db.session.commit()
 
     flash(f"{user.full_name}'s subscription has been updated.", "success")
-    return redirect(url_for("admin_users"))
+    return redirect(url_for("admin_user_detail", user_id=user.id))
 
 
 @app.route("/admin/users/<int:user_id>/status", methods=["POST"])
@@ -2254,7 +2356,7 @@ def update_user_status(user_id):
     db.session.commit()
 
     flash(f"{user.full_name}'s account status has been updated.", "success")
-    return redirect(url_for("admin_users"))
+    return redirect(url_for("admin_user_detail", user_id=user.id))
 
 
 @app.route("/upgrade", methods=["GET", "POST"])

@@ -48,6 +48,7 @@
                 action="{{ url_for('delete_document', document_id=document.id) }}"
                 onsubmit="return confirm('Are you sure you want to delete this document and all its chunks?');"
         >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="danger-btn">
                 Delete This Document
             </button>

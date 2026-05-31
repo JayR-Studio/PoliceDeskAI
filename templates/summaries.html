@@ -22,6 +22,7 @@
             </div>
 
             <form method="POST" class="summary-form" id="summaryForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <label for="document_id">Select document</label>
 
                 <select name="document_id" id="document_id" required>

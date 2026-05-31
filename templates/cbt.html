@@ -27,6 +27,7 @@
             </div>
 
             <form method="POST" class="cbt-form" id="cbtForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="cbt-document-list">
                     {% if documents %}
                     {% for document in documents %}
@@ -103,7 +104,9 @@
                     method="POST"
                     action="{{ url_for('generate_cbt_bank', document_id=document.id) }}"
                     class="hidden-generate-form"
-            ></form>
+            >
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            </form>
             {% endfor %}
             {% endif %}
         </section>

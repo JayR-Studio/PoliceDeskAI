@@ -66,6 +66,7 @@
             {% endif %}
 
             {% if session.get("is_admin") %}
+            <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
             <a href="{{ url_for('admin_upload') }}">Upload Documents</a>
             <a href="{{ url_for('admin_users') }}">Manage Users</a>
             <a href="{{ url_for('admin_upgrade_requests') }}">Upgrade Requests</a>

@@ -2381,5 +2381,71 @@ def update_upgrade_request_status(request_id):
     return redirect(url_for("admin_upgrade_requests"))
 
 
+@app.route("/admin/dashboard")
+@admin_required
+def admin_dashboard():
+    month, year = get_current_month_year()
+
+    total_users = User.query.count()
+
+    active_users = User.query.filter_by(account_status="active").count()
+    trial_users = User.query.filter_by(account_status="trial").count()
+    pending_users = User.query.filter_by(account_status="pending").count()
+    expired_users = User.query.filter_by(account_status="expired").count()
+    suspended_users = User.query.filter_by(account_status="suspended").count()
+
+    pending_upgrade_requests = UpgradeRequest.query.filter_by(status="pending").count()
+    approved_upgrade_requests = UpgradeRequest.query.filter_by(status="approved").count()
+    rejected_upgrade_requests = UpgradeRequest.query.filter_by(status="rejected").count()
+
+    monthly_usage_logs = (
+        UsageLog.query
+        .filter_by(month=month, year=year)
+        .all()
+    )
+
+    monthly_usage = {
+        "ai_chat": 0,
+        "study_note": 0,
+        "cbt_exam": 0
+    }
+
+    for log in monthly_usage_logs:
+        if log.action_type in monthly_usage:
+            monthly_usage[log.action_type] += log.count
+
+    recent_users = (
+        User.query
+        .order_by(User.created_at.desc())
+        .limit(5)
+        .all()
+    )
+
+    recent_upgrade_requests = (
+        UpgradeRequest.query
+        .order_by(UpgradeRequest.created_at.desc())
+        .limit(5)
+        .all()
+    )
+
+    return render_template(
+        "admin_dashboard.html",
+        total_users=total_users,
+        active_users=active_users,
+        trial_users=trial_users,
+        pending_users=pending_users,
+        expired_users=expired_users,
+        suspended_users=suspended_users,
+        pending_upgrade_requests=pending_upgrade_requests,
+        approved_upgrade_requests=approved_upgrade_requests,
+        rejected_upgrade_requests=rejected_upgrade_requests,
+        monthly_usage=monthly_usage,
+        month=month,
+        year=year,
+        recent_users=recent_users,
+        recent_upgrade_requests=recent_upgrade_requests
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=app.config["DEBUG"])

@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block page_title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<section class="admin-dashboard-shell">
+    <div class="usage-hero">
+        <div>
+            <p class="reader-eyebrow">Admin Overview</p>
+            <h3>PoliceDesk AI Control Room</h3>
+            <p>
+                Monitor users, subscriptions, upgrade requests, and monthly AI usage.
+            </p>
+        </div>
+    </div>
+
+    <section class="admin-stat-grid">
+        <article class="admin-stat-card">
+            <span>Total Users</span>
+            <strong>{{ total_users }}</strong>
+            <p>Registered officers.</p>
+        </article>
+
+        <article class="admin-stat-card">
+            <span>Active</span>
+            <strong>{{ active_users }}</strong>
+            <p>Paid active users.</p>
+        </article>
+
+        <article class="admin-stat-card">
+            <span>Trial</span>
+            <strong>{{ trial_users }}</strong>
+            <p>Users on free trial.</p>
+        </article>
+
+        <article class="admin-stat-card">
+            <span>Expired</span>
+            <strong>{{ expired_users }}</strong>
+            <p>Users needing renewal.</p>
+        </article>
+
+        <article class="admin-stat-card">
+            <span>Suspended</span>
+            <strong>{{ suspended_users }}</strong>
+            <p>Blocked accounts.</p>
+        </article>
+
+        <article class="admin-stat-card">
+            <span>Pending Users</span>
+            <strong>{{ pending_users }}</strong>
+            <p>Awaiting approval.</p>
+        </article>
+    </section>
+
+    <section class="admin-dashboard-grid">
+        <article class="admin-dashboard-panel">
+            <div class="admin-panel-header">
+                <div>
+                    <h4>Monthly Usage</h4>
+                    <p>{{ month }}/{{ year }}</p>
+                </div>
+            </div>
+
+            <div class="admin-usage-banner-grid">
+                <div class="admin-usage-mini-stat">
+                    <span>AI Chat</span>
+                    <strong>{{ monthly_usage.ai_chat }}</strong>
+                    <small>Questions</small>
+                </div>
+
+                <div class="admin-usage-mini-stat">
+                    <span>Study Notes</span>
+                    <strong>{{ monthly_usage.study_note }}</strong>
+                    <small>Generated</small>
+                </div>
+
+                <div class="admin-usage-mini-stat">
+                    <span>CBT Exams</span>
+                    <strong>{{ monthly_usage.cbt_exam }}</strong>
+                    <small>Started</small>
+                </div>
+            </div>
+        </article>
+
+        <article class="admin-dashboard-panel">
+            <div class="admin-panel-header">
+                <div>
+                    <h4>Upgrade Requests</h4>
+                    <p>Manual payment review queue.</p>
+                </div>
+
+                <a href="{{ url_for('admin_upgrade_requests') }}" class="small-action-btn primary-action">
+                    View Requests
+                </a>
+            </div>
+
+            <div class="admin-request-summary">
+                <div>
+                    <span>Pending</span>
+                    <strong>{{ pending_upgrade_requests }}</strong>
+                </div>
+
+                <div>
+                    <span>Approved</span>
+                    <strong>{{ approved_upgrade_requests }}</strong>
+                </div>
+
+                <div>
+                    <span>Rejected</span>
+                    <strong>{{ rejected_upgrade_requests }}</strong>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <section class="admin-dashboard-grid">
+        <article class="admin-dashboard-panel">
+            <div class="admin-panel-header">
+                <div>
+                    <h4>Recent Users</h4>
+                    <p>Latest registered users.</p>
+                </div>
+
+                <a href="{{ url_for('admin_users') }}" class="small-action-btn secondary-action">
+                    Manage Users
+                </a>
+            </div>
+
+            {% if recent_users %}
+                <div class="admin-mini-list">
+                    {% for user in recent_users %}
+                        <a href="{{ url_for('admin_user_detail', user_id=user.id) }}" class="admin-mini-list-item">
+                            <div>
+                                <strong>{{ user.full_name }}</strong>
+                                <span>{{ user.email }}</span>
+                            </div>
+
+                            <em class="user-status-pill status-{{ user.account_status }}">
+                                {{ user.account_status|title }}
+                            </em>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-mini-state">
+                    <p>No users yet.</p>
+                </div>
+            {% endif %}
+        </article>
+
+        <article class="admin-dashboard-panel">
+            <div class="admin-panel-header">
+                <div>
+                    <h4>Recent Upgrade Requests</h4>
+                    <p>Latest submitted upgrade requests.</p>
+                </div>
+            </div>
+
+            {% if recent_upgrade_requests %}
+                <div class="admin-mini-list">
+                    {% for request_item in recent_upgrade_requests %}
+                        <a href="{{ url_for('admin_user_detail', user_id=request_item.user.id) }}" class="admin-mini-list-item">
+                            <div>
+                                <strong>{{ request_item.user.full_name }}</strong>
+                                <span>{{ request_item.requested_plan|replace("_", " ")|title }}</span>
+                            </div>
+
+                            <em class="user-status-pill status-{{ request_item.status }}">
+                                {{ request_item.status|title }}
+                            </em>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-mini-state">
+                    <p>No upgrade requests yet.</p>
+                </div>
+            {% endif %}
+        </article>
+    </section>
+</section>
+{% endblock %}
